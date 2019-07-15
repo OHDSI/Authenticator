@@ -25,10 +25,6 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
@@ -99,6 +95,7 @@
     </dependencies>
 
     <build>
+        <finalName>authenticator</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -106,9 +103,7 @@
                 <version>2.1.6.RELEASE</version>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
+                        <id>repackage</id>
                         <configuration>
                             <classifier>exec</classifier>
                         </configuration>
