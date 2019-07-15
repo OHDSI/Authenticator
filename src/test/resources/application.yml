@@ -1,0 +1,61 @@
+authenticator:
+  methods:
+    db:
+      service: org.ohdsi.authenticator.service.jdbc.JdbcAuthService
+      config:
+        jdbcUrl: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+        username: sa
+        password:
+        query: SELECT password, first_name, middle_name, last_name FROM USERS WHERE USERNAME = :username
+        passwordEncoder: org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+        fieldsToExtract:
+          firstName: first_name
+          middleName: middle_name
+          lastName: last_name
+    rest-arachne:
+      service: org.ohdsi.authenticator.service.rest.RestAuthService
+      config:
+        url: https://www.arachnenetwork.com/api/v1/auth/login
+        bodyFormat: JSON
+        params:
+          username: username
+          password: password
+        loginSuccessCriteria:
+          status: 200 OK
+          bodyProperty:
+            "[$.errorCode]": 0
+        token:
+          source: BODY
+          key: $.result.token
+          targetHeader: Arachne-Auth-Token
+          targetFormat: '%s'
+        infoUrl: https://www.arachnenetwork.com/api/v1/auth/me
+        fieldsToExtract:
+          firstName: $.result.firstname
+          middleName: $.result.middlename
+          lastName: $.result.lastname
+    rest-atlas:
+      service: org.ohdsi.authenticator.service.rest.RestAuthService
+      config:
+        url: https://qaatlas.arachnenetwork.com/WebAPI/user/login/db
+        bodyFormat: FORMDATA
+        params:
+          login: username
+          password: password
+        loginSuccessCriteria:
+          status: 200 OK
+          bodyProperty:
+            "[$.permissions]": ''
+        token:
+          source: HEADERS
+          key: Bearer
+          targetHeader: Authorization
+          targetFormat: 'Bearer %s'
+        infoUrl: https://qaatlas.arachnenetwork.com/WebAPI/user/me
+        fieldsToExtract:
+          name: $.name
+security:
+  jwt:
+    token:
+      secretKey: supersecret123verylongtosatisfyHMAC
+      validityInSeconds: 600
