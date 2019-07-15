@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class AuthMethodSettins {
+public class AuthMethodSettings {
 
     private String service;
     private Map config;

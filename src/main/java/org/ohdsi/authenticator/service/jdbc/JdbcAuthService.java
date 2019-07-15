@@ -7,6 +7,7 @@ import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.service.AuthService;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ClassUtils;
 
@@ -31,18 +32,17 @@ public class JdbcAuthService extends AuthService<JdbcAuthServiceConfig> {
     }
 
     @Override
-    public Map<String, String> authenticate(AuthenticationRequest request) {
+    public Authentication authenticate(AuthenticationRequest request) {
 
         var ps = new NamedParameterJdbcTemplate(ds);
-        var params = new MapSqlParameterSource();
-        params.addValue(USERNAME_PARAM, request.getUsername());
-        var userInfo = ps.queryForObject(config.getQuery(), params, this::mapUserInfo);
-        if (passwordEncoder.matches(request.getPassword(), userInfo.get(PASSWORD_PARAM))) {
-            userInfo.remove(PASSWORD_PARAM);
-            return userInfo;
-        } else {
-            throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
-        }
+        var params = buildQueryParams(request);
+        var details = ps.queryForObject(config.getQuery(), params, this::mapUserInfo);
+        var isAuthenticated = isSuccessfulLogin(request, details.remove(PASSWORD_PARAM));
+        return new AuthenticationBuilder()
+            .setAuthenticated(isAuthenticated)
+            .setUsername(request.getUsername())
+            .setUserDetails(details)
+            .build();
     }
 
     private void initConnectionPool() {
@@ -59,6 +59,13 @@ public class JdbcAuthService extends AuthService<JdbcAuthServiceConfig> {
         return (PasswordEncoder) ClassUtils.forName(config.getPasswordEncoder(), this.getClass().getClassLoader()).newInstance();
     }
 
+    private MapSqlParameterSource buildQueryParams(AuthenticationRequest request) {
+
+        var params = new MapSqlParameterSource();
+        params.addValue(USERNAME_PARAM, request.getUsername());
+        return params;
+    }
+
     private Map<String, String> mapUserInfo(ResultSet rs, int rowNum) {
 
         try {
@@ -71,5 +78,10 @@ public class JdbcAuthService extends AuthService<JdbcAuthServiceConfig> {
         } catch (SQLException ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
         }
+    }
+
+    private boolean isSuccessfulLogin(AuthenticationRequest request, String actualPassword) {
+
+        return passwordEncoder.matches(request.getPassword(), actualPassword);
     }
 }

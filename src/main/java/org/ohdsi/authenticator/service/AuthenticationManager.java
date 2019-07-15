@@ -3,6 +3,7 @@ package org.ohdsi.authenticator.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.var;
+import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.security.JwtTokenProvider;
@@ -23,6 +24,8 @@ import java.util.Map;
 public class AuthenticationManager {
 
     private static final String METHODS_KEY = "authenticator.methods";
+    private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
+    private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
 
     private ConfigurableEnvironment environment;
     private JwtTokenProvider jwtTokenProvider;
@@ -47,13 +50,21 @@ public class AuthenticationManager {
 
         var authService = getForMethod(method);
 
-        Map<String, String> userAdditionalInfo = authService.authenticate(request);
+        if (authService == null) {
+            throw new AuthenticationException(METHOD_NOT_SUPPORTED_ERROR);
+        }
+
+        var authentication = authService.authenticate(request);
+
+        if (!authentication.isAuthenticated()) {
+            throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
+        }
 
         var userInfo = new UserInfo();
-        userInfo.setUsername(request.getUsername());
+        userInfo.setUsername(authentication.getPrincipal().toString());
         userInfo.setAuthMethod(method);
-        userInfo.setAdditionalInfo(userAdditionalInfo);
-        userInfo.setToken(jwtTokenProvider.createToken(request.getUsername(), userAdditionalInfo));
+        userInfo.setAdditionalInfo((Map) authentication.getDetails());
+        userInfo.setToken(jwtTokenProvider.createToken(request.getUsername(), userInfo.getAdditionalInfo()));
 
         return userInfo;
     }
@@ -67,31 +78,31 @@ public class AuthenticationManager {
 
     private void initServices() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        Map<String, AuthMethodSettins> authMethodSettingsMap = loadAuthMethodsSettings();
+        Map<String, AuthMethodSettings> authMethodSettingsMap = loadAuthMethodsSettings();
 
-        for (Map.Entry<String, AuthMethodSettins> entry : authMethodSettingsMap.entrySet()) {
+        for (Map.Entry<String, AuthMethodSettings> entry : authMethodSettingsMap.entrySet()) {
             String method = entry.getKey();
-            AuthMethodSettins authMethodSettins = entry.getValue();
+            AuthMethodSettings authMethodSettings = entry.getValue();
 
-            String authServiceClassName = authMethodSettins.getService();
+            String authServiceClassName = authMethodSettings.getService();
             Class authServiceClass = ClassUtils.forName(authServiceClassName, this.getClass().getClassLoader());
 
             Class configClass = resolveRequiredConfigClass(authServiceClass);
-            AuthServiceConfig config = resolveConfig(authMethodSettins.getConfig(), configClass);
+            AuthServiceConfig config = resolveConfig(authMethodSettings.getConfig(), configClass);
 
             AuthService authService = constructAuthService(authServiceClass, config);
             authServices.put(method, authService);
         }
     }
 
-    private Map<String, AuthMethodSettins> loadAuthMethodsSettings() {
+    private Map<String, AuthMethodSettings> loadAuthMethodsSettings() {
 
         Iterable<ConfigurationPropertySource> sources = ConfigurationPropertySources.get(environment);
         var binder = new Binder(sources);
         Map<String, Map<String, String>> rawMethodsMap = binder.bind(METHODS_KEY, (Class<Map<String, Map<String, String>>>) (Class) Map.class).get();
 
-        Map<String, AuthMethodSettins> configuration = new HashMap<>();
-        rawMethodsMap.forEach((m, c) -> configuration.put(m, objectMapper.convertValue(c, AuthMethodSettins.class)));
+        Map<String, AuthMethodSettings> configuration = new HashMap<>();
+        rawMethodsMap.forEach((m, c) -> configuration.put(m, objectMapper.convertValue(c, AuthMethodSettings.class)));
 
         return configuration;
     }

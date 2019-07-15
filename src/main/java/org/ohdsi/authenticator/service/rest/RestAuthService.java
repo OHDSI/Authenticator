@@ -2,6 +2,7 @@ package org.ohdsi.authenticator.service.rest;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import lombok.var;
 import org.apache.logging.log4j.util.Strings;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -22,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class RestAuthService extends AuthService<RestAuthServiceConfig> {
 
@@ -31,7 +34,7 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
     }
 
     @Override
-    public Map<String, String> authenticate(AuthenticationRequest request) {
+    public Authentication authenticate(AuthenticationRequest request) {
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -41,13 +44,21 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
         HttpEntity httpEntity = new HttpEntity(formatBody(body, headers.getContentType()), headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(config.getUrl(), HttpMethod.POST, httpEntity, String.class);
 
-        if (isSuccessfulLogin(responseEntity)) {
-            String token = extractToken(responseEntity);
-            ResponseEntity<String> userInfoResponse = queryUserInfo(token);
-            return extractUserInfo(userInfoResponse);
-        } else {
-            throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
+        var isAuthenticated = isSuccessfulLogin(responseEntity);
+        var authBuilder = new AuthenticationBuilder()
+            .setAuthenticated(isAuthenticated)
+            .setUsername(request.getUsername());
+
+        if (isAuthenticated) {
+            var details = Stream.of(responseEntity)
+                .map(this::extractToken)
+                .map(this::queryUserInfo)
+                .map(this::extractUserInfo)
+                .findFirst().orElseThrow(() -> new AuthenticationException(INFO_EXTRACTION_ERROR));
+            authBuilder.setUserDetails(details);
         }
+
+        return authBuilder.build();
     }
 
     private HttpHeaders getAuthHeaders() {
