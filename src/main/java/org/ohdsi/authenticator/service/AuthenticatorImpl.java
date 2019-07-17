@@ -3,14 +3,11 @@ package org.ohdsi.authenticator.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.var;
+import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
+import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.security.JwtTokenProvider;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
@@ -21,21 +18,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthenticationManager {
+public class AuthenticatorImpl implements Authenticator {
 
-    private static final String METHODS_KEY = "authenticator.methods";
+    private static final String METHOD_KEY = "method";
     private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
     private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
 
-    private ConfigurableEnvironment environment;
+    private AuthSchema authSchema;
     private JwtTokenProvider jwtTokenProvider;
     private ObjectMapper objectMapper;
 
     private Map<String, AuthService> authServices = new HashMap<>();
 
-    public AuthenticationManager(ConfigurableEnvironment environment, JwtTokenProvider jwtTokenProvider) {
+    public AuthenticatorImpl(AuthSchema authSchema, JwtTokenProvider jwtTokenProvider) {
 
-        this.environment = environment;
+        this.authSchema = authSchema;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -46,6 +43,7 @@ public class AuthenticationManager {
         initServices();
     }
 
+    @Override
     public UserInfo authenticate(String method, AuthenticationRequest request) {
 
         var authService = getForMethod(method);
@@ -60,27 +58,40 @@ public class AuthenticationManager {
             throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
         }
 
-        var userInfo = new UserInfo();
-        userInfo.setUsername(authentication.getPrincipal().toString());
-        userInfo.setAuthMethod(method);
-        userInfo.setAdditionalInfo((Map) authentication.getDetails());
-        userInfo.setToken(jwtTokenProvider.createToken(request.getUsername(), userInfo.getAdditionalInfo()));
+        return buildUserInfo(authentication, method);
+    }
 
-        return userInfo;
+    @Override
+    public String resolveUsername(String token) {
+
+        return jwtTokenProvider.resolveClaims(token).getBody().getSubject();
+    }
+
+    @Override
+    public UserInfo refreshToken(String token) {
+
+        var claims = jwtTokenProvider.resolveClaims(token);
+        var usedMethod = claims.getBody().get(METHOD_KEY, String.class);
+        var authService = getForMethod(usedMethod);
+        var authentication = authService.refreshToken(claims);
+        return buildUserInfo(authentication, usedMethod);
+    }
+
+    @Override
+    public void invalidateToken(String token) {
+
+        jwtTokenProvider.invalidateToken(token);
     }
 
     private void initObjectMapper() {
 
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        this.objectMapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
     }
 
     private void initServices() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        Map<String, AuthMethodSettings> authMethodSettingsMap = loadAuthMethodsSettings();
-
-        for (Map.Entry<String, AuthMethodSettings> entry : authMethodSettingsMap.entrySet()) {
+        for (Map.Entry<String, AuthMethodSettings> entry : authSchema.getMethods().entrySet()) {
             String method = entry.getKey();
             AuthMethodSettings authMethodSettings = entry.getValue();
 
@@ -93,18 +104,6 @@ public class AuthenticationManager {
             AuthService authService = constructAuthService(authServiceClass, config);
             authServices.put(method, authService);
         }
-    }
-
-    private Map<String, AuthMethodSettings> loadAuthMethodsSettings() {
-
-        Iterable<ConfigurationPropertySource> sources = ConfigurationPropertySources.get(environment);
-        var binder = new Binder(sources);
-        Map<String, Map<String, String>> rawMethodsMap = binder.bind(METHODS_KEY, (Class<Map<String, Map<String, String>>>) (Class) Map.class).get();
-
-        Map<String, AuthMethodSettings> configuration = new HashMap<>();
-        rawMethodsMap.forEach((m, c) -> configuration.put(m, objectMapper.convertValue(c, AuthMethodSettings.class)));
-
-        return configuration;
     }
 
     private Class<? extends AuthServiceConfig> resolveRequiredConfigClass(Class authServiceClass) {
@@ -134,5 +133,23 @@ public class AuthenticationManager {
     private AuthService getForMethod(String method) {
 
         return authServices.get(method);
+    }
+
+    private UserInfo buildUserInfo(AuthenticationToken authentication, String method) {
+
+        String username = authentication.getPrincipal().toString();
+
+        Map userAdditionalInfo = (Map) authentication.getDetails();
+        userAdditionalInfo.put(METHOD_KEY, method);
+
+        String token = jwtTokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
+
+        var userInfo = new UserInfo();
+        userInfo.setUsername(username);
+        userInfo.setAuthMethod(method);
+        userInfo.setAdditionalInfo(userAdditionalInfo);
+        userInfo.setToken(token);
+
+        return userInfo;
     }
 }

@@ -2,7 +2,6 @@ package org.ohdsi.authenticator.service;
 
 import lombok.var;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.security.JwtTokenProvider;
 import org.springframework.stereotype.Service;
 
 @Service

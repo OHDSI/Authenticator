@@ -16,24 +16,5 @@ public class RestAuthServiceConfig extends AuthServiceConfig {
     private LoginSuccessCriteria loginSuccessCriteria;
     private TokenConfig token;
     private String infoUrl;
-
-    public enum BodyFormat {
-        JSON,
-        FORMDATA;
-    }
-
-    @Getter
-    @Setter
-    public class TokenConfig {
-
-        private HttpPart source;
-        private String key;
-        private String targetHeader;
-        private String targetFormat;
-    }
-
-    public enum HttpPart {
-        HEADERS,
-        BODY;
-    }
+    private RefreshTokenConfig refresh;
 }

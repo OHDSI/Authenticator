@@ -21,19 +21,23 @@ authenticator:
           username: username
           password: password
         loginSuccessCriteria:
-          status: 200 OK
-          bodyProperty:
-            "[$.errorCode]": 0
+          status: OK
+          bodyProperty: '$[?(@.errorCode == 0)]'
         token:
           source: BODY
           key: $.result.token
           targetHeader: Arachne-Auth-Token
           targetFormat: '%s'
+          copyExpirationDate: true
         infoUrl: https://www.arachnenetwork.com/api/v1/auth/me
         fieldsToExtract:
           firstName: $.result.firstname
           middleName: $.result.middlename
           lastName: $.result.lastname
+        refresh:
+          url: https://www.arachnenetwork.com/api/v1/auth/refresh
+          source: BODY
+          key: $.result
     rest-atlas:
       service: org.ohdsi.authenticator.service.rest.RestAuthService
       config:
@@ -43,9 +47,8 @@ authenticator:
           login: username
           password: password
         loginSuccessCriteria:
-          status: 200 OK
-          bodyProperty:
-            "[$.permissions]": ''
+          status: OK
+          bodyProperty: '$[?(@.permissions)]'
         token:
           source: HEADERS
           key: Bearer
@@ -57,5 +60,5 @@ authenticator:
 security:
   jwt:
     token:
-      secretKey: supersecret123verylongtosatisfyHMAC
-      validityInSeconds: 600
+      secretKey: 129DF19C8A91AFD8375A2826A33539K01ACQ778QOJFAA9MGWLWH73PLXVFVHBR7860MTIE2O8EEVF9KCO77P6A7NUNX4XHAGCRFSBWG879XPDOIN6C2LFCKJI002OIABS4D6Q9VMJJIX8UCE48EF
+      validityInSeconds: 60

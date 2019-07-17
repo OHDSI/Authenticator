@@ -4,22 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Getter
 @Setter
 public class LoginSuccessCriteria {
 
     private HttpStatus status;
     /**
-     * key - Header name
-     * value - Header value
+     * JsonPath rule that should return JSONArray.size() > 0
      */
-    private Map<String, String> header = new HashMap<>();
-    /**
-     * key - JsonPath of property
-     * value - value of the property
-     */
-    private Map<String, String> bodyProperty = new HashMap<>();
+    private String bodyProperty;
 }

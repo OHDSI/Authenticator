@@ -1,11 +1,12 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.ohdsi.authenticator.model.AuthenticationToken;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 public abstract class AuthService<T extends AuthServiceConfig> {
@@ -19,13 +20,23 @@ public abstract class AuthService<T extends AuthServiceConfig> {
         this.config = config;
     }
 
-    abstract public Authentication authenticate(AuthenticationRequest request);
+    abstract public AuthenticationToken authenticate(AuthenticationRequest request);
+
+    public AuthenticationToken refreshToken(Jws<Claims> claims) {
+
+        return new AuthenticationBuilder()
+            .setAuthenticated(true)
+            .setUsername(claims.getBody().getSubject())
+            .setUserDetails((Map) claims.getBody())
+            .build();
+    }
 
     public class AuthenticationBuilder {
 
         private boolean authenticated = false;
         private String username;
         private Map<String, String> details;
+        private Date expirationDate;
 
         public AuthenticationBuilder setAuthenticated(boolean authenticated) {
 
@@ -45,15 +56,25 @@ public abstract class AuthService<T extends AuthServiceConfig> {
             return this;
         }
 
-        public Authentication build() {
+        public AuthenticationBuilder setExpirationDate(Date expirationDate) {
 
+            this.expirationDate = expirationDate;
+            return this;
+        }
+
+        public AuthenticationToken build() {
+
+            AuthenticationToken token;
             if (authenticated) {
-                var token = new UsernamePasswordAuthenticationToken(username, "", new ArrayList<>());
+                token = new AuthenticationToken(username, "", new ArrayList<>());
                 token.setDetails(details);
-                return token;
             } else {
-                return new UsernamePasswordAuthenticationToken(username, "");
+                token = new AuthenticationToken(username, "");
             }
+
+            token.setExpirationDate(expirationDate);
+
+            return token;
         }
     }
 }

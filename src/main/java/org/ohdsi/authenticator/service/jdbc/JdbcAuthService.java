@@ -4,10 +4,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
+import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.service.AuthService;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ClassUtils;
 
@@ -32,7 +32,7 @@ public class JdbcAuthService extends AuthService<JdbcAuthServiceConfig> {
     }
 
     @Override
-    public Authentication authenticate(AuthenticationRequest request) {
+    public AuthenticationToken authenticate(AuthenticationRequest request) {
 
         var ps = new NamedParameterJdbcTemplate(ds);
         var params = buildQueryParams(request);
