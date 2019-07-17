@@ -2,7 +2,7 @@ package org.ohdsi.authenticator;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ohdsi.authenticator.security.JwtTokenProvider;
+import org.ohdsi.authenticator.service.JwtTokenProvider;
 import org.ohdsi.authenticator.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

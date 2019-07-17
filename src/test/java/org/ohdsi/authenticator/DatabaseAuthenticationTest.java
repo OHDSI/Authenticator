@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.service.AuthenticationManager;
+import org.ohdsi.authenticator.service.Authenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,13 +23,13 @@ public class DatabaseAuthenticationTest {
     private static final String METHOD = "db";
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private Authenticator authenticator;
 
     @Test
     public void testDbAuthSuccess() {
 
         var authRequest = new AuthenticationRequest("admin", "password");
-        UserInfo userInfo = authenticationManager.authenticate(METHOD, authRequest);
+        UserInfo userInfo = authenticator.authenticate(METHOD, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
                         && Objects.nonNull(userInfo.getToken())
@@ -47,7 +47,7 @@ public class DatabaseAuthenticationTest {
 
         boolean failed = false;
         try {
-            authenticationManager.authenticate(METHOD, authRequest);
+            authenticator.authenticate(METHOD, authRequest);
         } catch (AuthenticationException ex) {
             failed = true;
         }
