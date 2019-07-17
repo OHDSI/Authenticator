@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.service.AuthenticationManager;
+import org.ohdsi.authenticator.service.Authenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +22,7 @@ import java.util.Objects;
 public class RestAuthenticationTest {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private Authenticator authenticator;
 
     @Value("${credentials.rest-arachne.username}")
     private String arachneUsername;
@@ -39,7 +39,7 @@ public class RestAuthenticationTest {
 
         final var method = "rest-arachne";
         var authRequest = new AuthenticationRequest(arachneUsername, arachnePassword);
-        UserInfo userInfo = authenticationManager.authenticate(method, authRequest);
+        UserInfo userInfo = authenticator.authenticate(method, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername()),
                 "Failed to authenticate user with proper credentials"
@@ -51,7 +51,7 @@ public class RestAuthenticationTest {
 
         final var method = "rest-atlas";
         var authRequest = new AuthenticationRequest(atlasUsername, atlasPassword);
-        UserInfo userInfo = authenticationManager.authenticate(method, authRequest);
+        UserInfo userInfo = authenticator.authenticate(method, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername()),
                 "Failed to authenticate user with proper credentials"
@@ -65,7 +65,7 @@ public class RestAuthenticationTest {
 
         boolean failed = false;
         try {
-            authenticationManager.authenticate("rest-arachne", authRequest);
+            authenticator.authenticate("rest-arachne", authRequest);
         } catch (AuthenticationException ex) {
             failed = true;
         }
