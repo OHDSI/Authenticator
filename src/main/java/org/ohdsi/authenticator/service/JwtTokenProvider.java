@@ -29,12 +29,12 @@ public class JwtTokenProvider {
     @Value("${security.jwt.token.validityInSeconds}")
     private long validityInSeconds;
 
-    public String createToken(String username, Map<String, String> userAdditionalInfo) {
+    String createToken(String username, Map<String, String> userAdditionalInfo) {
 
         return createToken(username, userAdditionalInfo, null);
     }
 
-    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
 
         Claims claims = Jwts.claims().setSubject(username);
         claims.putAll(userAdditionalInfo);
