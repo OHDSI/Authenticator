@@ -68,6 +68,13 @@ public class AuthenticatorImpl implements Authenticator {
     }
 
     @Override
+    public <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass) {
+
+        var claims = jwtTokenProvider.resolveClaims(token);
+        return claims.getBody().get(key, valueClass);
+    }
+
+    @Override
     public UserInfo refreshToken(String token) {
 
         var claims = jwtTokenProvider.resolveClaims(token);
