@@ -2,6 +2,8 @@ package org.ohdsi.authenticator.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import lombok.val;
 import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -62,9 +64,32 @@ public class AuthenticatorImpl implements Authenticator {
     }
 
     @Override
+    public UserInfo resolveUser(String token) {
+
+        val claims = jwtTokenProvider.resolveClaims(token);
+        val usedMethod = claims.getBody().get(METHOD_KEY, String.class);
+        val subject = claims.getBody().getSubject();
+        var userInfo = new UserInfo();
+        userInfo.setUsername(subject);
+        userInfo.setAuthMethod(usedMethod);
+        userInfo.setToken(token);
+        claims.getBody().keySet().stream()
+                .filter(key -> !Claims.SUBJECT.equals(key))
+                .forEach(key -> userInfo.getAdditionalInfo()
+                        .put(key, claims.getBody().get(key)));
+        return userInfo;
+    }
+
+    @Override
     public String resolveUsername(String token) {
 
-        return jwtTokenProvider.resolveClaims(token).getBody().getSubject();
+        return resolveAdditionalInfoAsString(token, Claims.SUBJECT);
+    }
+
+    @Override
+    public String resolveAdditionalInfoAsString(String token, String key) {
+
+        return resolveAdditionalInfo(token, key, String.class);
     }
 
     @Override
@@ -151,11 +176,8 @@ public class AuthenticatorImpl implements Authenticator {
 
         String token = jwtTokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
 
-        var userInfo = new UserInfo();
-        userInfo.setUsername(username);
-        userInfo.setAuthMethod(method);
+        var userInfo = resolveUser(token);
         userInfo.setAdditionalInfo(userAdditionalInfo);
-        userInfo.setToken(token);
 
         return userInfo;
     }

@@ -13,5 +13,5 @@ public class UserInfo {
     private String username;
     private String token;
     private String authMethod;
-    private Map<String, String> additionalInfo = new HashMap<>();
+    private Map<String, Object> additionalInfo = new HashMap<>();
 }
