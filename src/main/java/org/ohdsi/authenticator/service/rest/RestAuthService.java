@@ -2,16 +2,15 @@ package org.ohdsi.authenticator.service.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.service.AuthService;
+import org.pac4j.core.credentials.Credentials;
+import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -43,12 +42,14 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
     }
 
     @Override
-    public AuthenticationToken authenticate(AuthenticationRequest request) {
+    public AuthenticationToken authenticate(Credentials request) {
+
+        UsernamePasswordCredentials creds = (UsernamePasswordCredentials) request;
 
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = getAuthHeaders();
-        Map<String, String> body = getAuthBody(request);
+        Map<String, String> body = getAuthBody(creds);
 
         HttpEntity httpEntity = new HttpEntity(formatBody(body, headers.getContentType()), headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(config.getUrl(), HttpMethod.POST, httpEntity, String.class);
@@ -56,14 +57,14 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
         var isAuthenticated = isSuccessfulLogin(responseEntity);
         var authBuilder = new AuthenticationBuilder()
                 .setAuthenticated(isAuthenticated)
-                .setUsername(request.getUsername());
+                .setUsername(creds.getUsername());
 
         if (isAuthenticated) {
             String remoteToken = extractRemoteToken(responseEntity, config.getToken());
 
             var details = Stream.of(remoteToken)
                     .map(this::queryUserInfo)
-                    .map(this::extractUserInfo)
+                    .map(this::extractUserDetails)
                     .findFirst().orElseThrow(() -> new AuthenticationException(INFO_EXTRACTION_ERROR));
             details.put(TOKEN_KEY, remoteToken);
 
@@ -117,7 +118,7 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
         return headers;
     }
 
-    private Map<String, String> getAuthBody(AuthenticationRequest request) {
+    private Map<String, String> getAuthBody(UsernamePasswordCredentials request) {
 
         ExpressionParser parser = new SpelExpressionParser();
         StandardEvaluationContext context = new StandardEvaluationContext(request);
@@ -195,13 +196,11 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
         return restTemplate.exchange(config.getInfoUrl(), HttpMethod.GET, httpEntity, String.class);
     }
 
-    private Map<String, String> extractUserInfo(ResponseEntity<String> responseEntity) {
+    private Map<String, String> extractUserDetails(ResponseEntity<String> responseEntity) {
 
         try {
-            Map<String, String> userInfo = new HashMap<>();
-            DocumentContext doc = JsonPath.parse(responseEntity.getBody());
-            config.getFieldsToExtract().forEach((targetField, jsonPath) -> userInfo.put(targetField, doc.read(jsonPath)));
-            return userInfo;
+            var responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
+            return extractUserDetails(responseBodyJson);
         } catch (Exception ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
         }

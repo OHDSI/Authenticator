@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.springframework.stereotype.Service;
 
