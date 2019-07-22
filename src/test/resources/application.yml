@@ -68,7 +68,17 @@ authenticator:
         fieldsToExtract:
           firstName: name.split(' ')[0]
           lastName: name.split(' ')[1]
-
+    ldap:
+      service: org.ohdsi.authenticator.service.ldap.LdapAuthService
+      config:
+        baseDn: ou=users,dc=example,dc=com
+        userDn: uid=admin,ou=system
+        password: secret
+        url: ldap://localhost:10389
+        searchFilter: uid={0}
+        fieldsToExtract:
+          firstName: displayName
+          lastName: sn
 security:
   jwt:
     token:
