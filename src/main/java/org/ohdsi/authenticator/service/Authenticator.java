@@ -7,6 +7,7 @@ public interface Authenticator {
 
     UserInfo authenticate(String method, AuthenticationRequest request);
     String resolveUsername(String token);
+
     UserInfo refreshToken(String token);
     void invalidateToken(String token);
 }
