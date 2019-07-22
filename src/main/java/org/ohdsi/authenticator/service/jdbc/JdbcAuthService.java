@@ -1,6 +1,7 @@
 package org.ohdsi.authenticator.service.jdbc;
 
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.service.AuthService;

@@ -13,5 +13,5 @@ mvn clean test \
     -Dauthenticator.methods.github.config.apiKey=abc123 \
     -Dauthenticator.methods.github.config.apiSecret=def567 \
     -Dcredentials.github.username=user \
-    -Dcredentials.github.password
+    -Dcredentials.github.password=HEX_password
 ```

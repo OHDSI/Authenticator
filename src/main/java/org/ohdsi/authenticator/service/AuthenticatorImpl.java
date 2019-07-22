@@ -2,6 +2,7 @@ package org.ohdsi.authenticator.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;

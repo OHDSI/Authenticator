@@ -1,5 +1,6 @@
 package org.ohdsi.authenticator.service;
 
+import lombok.var;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;

@@ -1,5 +1,6 @@
 package org.ohdsi.authenticator.service;
 
+import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.model.UserInfo;

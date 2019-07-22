@@ -1,6 +1,7 @@
 package org.ohdsi.authenticator.service.github;
 
 import com.github.scribejava.apis.GitHubApi;
+import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.service.AuthService;
