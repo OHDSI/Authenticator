@@ -17,18 +17,20 @@ import java.util.Objects;
 public class AuthenticatorTest extends BaseTest {
 
     private static final String USERNAME = "pgrafkin";
+    @Autowired
+    private TokenService tokenService;
 
     @Test
     public void testUserResolvedSuccessfully() {
 
         String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>());
-        Assert.isTrue(Objects.equals(USERNAME, authenticator.resolveUser(token).getUsername()), "Cannot resolve user from token");
+        Assert.isTrue(Objects.equals(USERNAME, tokenService.resolveUser(token).getUsername()), "Cannot resolve user from token");
     }
 
     @Test
     public void testUserResolutionFailure() {
 
         String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>());
-        Assert.isTrue(!Objects.equals("dummy", authenticator.resolveUser(token).getUsername()), "Resolved user from wrong token");
+        Assert.isTrue(!Objects.equals("dummy", tokenService.resolveUser(token).getUsername()), "Resolved user from wrong token");
     }
 }

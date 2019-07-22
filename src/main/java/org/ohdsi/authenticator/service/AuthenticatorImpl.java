@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthenticatorImpl implements Authenticator {
+public class AuthenticatorImpl implements Authenticator, TokenService {
 
     private static final String METHOD_KEY = "method";
     private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
