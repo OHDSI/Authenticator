@@ -4,8 +4,8 @@ import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -23,7 +23,7 @@ public class DatabaseAuthenticationTest extends BaseTest {
     @Test
     public void testDbAuthSuccess() {
 
-        var authRequest = new AuthenticationRequest("admin", "password");
+        var authRequest = new UsernamePasswordCredentials("admin", "password");
         UserInfo userInfo = authenticator.authenticate(METHOD, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
@@ -38,7 +38,7 @@ public class DatabaseAuthenticationTest extends BaseTest {
     @Test
     public void testDbAuthFailure() {
 
-        var authRequest = new AuthenticationRequest("admin", "dummy");
+        var authRequest = new UsernamePasswordCredentials("admin", "dummy");
 
         boolean failed = false;
         try {

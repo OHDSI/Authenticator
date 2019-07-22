@@ -2,11 +2,16 @@ package org.ohdsi.authenticator.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.pac4j.core.credentials.Credentials;
+import org.springframework.context.expression.MapAccessor;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AuthService<T extends AuthServiceConfig> {
@@ -20,7 +25,7 @@ public abstract class AuthService<T extends AuthServiceConfig> {
         this.config = config;
     }
 
-    abstract public AuthenticationToken authenticate(AuthenticationRequest request);
+    abstract public AuthenticationToken authenticate(Credentials credentials);
 
     public AuthenticationToken refreshToken(Jws<Claims> claims) {
 
@@ -29,6 +34,21 @@ public abstract class AuthService<T extends AuthServiceConfig> {
             .setUsername(claims.getBody().getSubject())
             .setUserDetails((Map) claims.getBody())
             .build();
+    }
+
+    protected Map<String, String> extractUserDetails(Map rawData) {
+
+        ExpressionParser parser = new SpelExpressionParser();
+        StandardEvaluationContext context = new StandardEvaluationContext(rawData);
+        context.addPropertyAccessor(new MapAccessor());
+
+        Map<String, String> details = new HashMap<>();
+        config.getFieldsToExtract().forEach((k, e) -> {
+            String val = parser.parseExpression(e).getValue(context, String.class);
+            details.put(k, val);
+        });
+
+        return details;
     }
 
     public class AuthenticationBuilder {

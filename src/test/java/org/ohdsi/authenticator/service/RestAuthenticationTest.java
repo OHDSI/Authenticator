@@ -4,8 +4,8 @@ import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,7 +33,7 @@ public class RestAuthenticationTest extends BaseTest {
     public void testRestArachneAuthSuccess() {
 
         final var method = "rest-arachne";
-        var authRequest = new AuthenticationRequest(arachneUsername, arachnePassword);
+        var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
@@ -46,7 +46,7 @@ public class RestAuthenticationTest extends BaseTest {
     public void testRestAtlasAuthSuccess() {
 
         final var method = "rest-atlas";
-        var authRequest = new AuthenticationRequest(atlasUsername, atlasPassword);
+        var authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
@@ -58,7 +58,7 @@ public class RestAuthenticationTest extends BaseTest {
     @Test
     public void testRestAuthFailure() {
 
-        var authRequest = new AuthenticationRequest("dummy", "dummy");
+        var authRequest = new UsernamePasswordCredentials("dummy", "dummy");
 
         boolean failed = false;
         try {

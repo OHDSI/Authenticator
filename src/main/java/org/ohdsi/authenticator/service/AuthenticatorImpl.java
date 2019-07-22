@@ -7,9 +7,9 @@ import lombok.val;
 import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.pac4j.core.credentials.Credentials;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
@@ -46,7 +46,7 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     }
 
     @Override
-    public UserInfo authenticate(String method, AuthenticationRequest request) {
+    public UserInfo authenticate(String method, Credentials request) {
 
         var authService = getForMethod(method);
 
