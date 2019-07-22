@@ -2,12 +2,14 @@ package org.ohdsi.authenticator.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import lombok.val;
 import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.pac4j.core.credentials.Credentials;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
@@ -18,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthenticatorImpl implements Authenticator {
+public class AuthenticatorImpl implements Authenticator, TokenService {
 
     private static final String METHOD_KEY = "method";
     private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
@@ -44,7 +46,7 @@ public class AuthenticatorImpl implements Authenticator {
     }
 
     @Override
-    public UserInfo authenticate(String method, AuthenticationRequest request) {
+    public UserInfo authenticate(String method, Credentials request) {
 
         var authService = getForMethod(method);
 
@@ -62,9 +64,39 @@ public class AuthenticatorImpl implements Authenticator {
     }
 
     @Override
+    public UserInfo resolveUser(String token) {
+
+        val claims = jwtTokenProvider.resolveClaims(token);
+        val usedMethod = claims.getBody().get(METHOD_KEY, String.class);
+        val subject = claims.getBody().getSubject();
+        var userInfo = new UserInfo();
+        userInfo.setUsername(subject);
+        userInfo.setAuthMethod(usedMethod);
+        userInfo.setToken(token);
+        claims.getBody().keySet().stream()
+                .filter(key -> !Claims.SUBJECT.equals(key))
+                .forEach(key -> userInfo.getAdditionalInfo()
+                        .put(key, claims.getBody().get(key)));
+        return userInfo;
+    }
+
+    @Override
     public String resolveUsername(String token) {
 
-        return jwtTokenProvider.resolveClaims(token).getBody().getSubject();
+        return resolveAdditionalInfoAsString(token, Claims.SUBJECT);
+    }
+
+    @Override
+    public String resolveAdditionalInfoAsString(String token, String key) {
+
+        return resolveAdditionalInfo(token, key, String.class);
+    }
+
+    @Override
+    public <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass) {
+
+        var claims = jwtTokenProvider.resolveClaims(token);
+        return claims.getBody().get(key, valueClass);
     }
 
     @Override
@@ -144,11 +176,8 @@ public class AuthenticatorImpl implements Authenticator {
 
         String token = jwtTokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
 
-        var userInfo = new UserInfo();
-        userInfo.setUsername(username);
-        userInfo.setAuthMethod(method);
+        var userInfo = resolveUser(token);
         userInfo.setAdditionalInfo(userAdditionalInfo);
-        userInfo.setToken(token);
 
         return userInfo;
     }

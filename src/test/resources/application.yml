@@ -9,9 +9,9 @@ authenticator:
         query: SELECT password, first_name, middle_name, last_name FROM USERS WHERE USERNAME = :username
         passwordEncoder: org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
         fieldsToExtract:
-          firstName: first_name
-          middleName: middle_name
-          lastName: last_name
+          firstName: FIRST_NAME
+          middleName: MIDDLE_NAME
+          lastName: LAST_NAME
     rest-arachne:
       service: org.ohdsi.authenticator.service.rest.RestAuthService
       config:
@@ -31,9 +31,9 @@ authenticator:
           copyExpirationDate: true
         infoUrl: https://www.arachnenetwork.com/api/v1/auth/me
         fieldsToExtract:
-          firstName: $.result.firstname
-          middleName: $.result.middlename
-          lastName: $.result.lastname
+          firstName: result.firstname
+          middleName: result.middlename
+          lastName: result.lastname
         refresh:
           url: https://www.arachnenetwork.com/api/v1/auth/refresh
           source: BODY
@@ -56,7 +56,19 @@ authenticator:
           targetFormat: 'Bearer %s'
         infoUrl: https://qaatlas.arachnenetwork.com/WebAPI/user/me
         fieldsToExtract:
-          name: $.name
+          name: name
+    github:
+      service: org.ohdsi.authenticator.service.github.GithubAuthService
+      config:
+        # apiKey:
+        # apiSecret:
+        scope: user:email
+        callbackUrl: http://localhost:8080/authentication/login
+        usernameProperty: email
+        fieldsToExtract:
+          firstName: name.split(' ')[0]
+          lastName: name.split(' ')[1]
+
 security:
   jwt:
     token:

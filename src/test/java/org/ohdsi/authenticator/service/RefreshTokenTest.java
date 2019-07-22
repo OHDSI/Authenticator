@@ -3,8 +3,8 @@ package org.ohdsi.authenticator.service;
 import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ohdsi.authenticator.model.AuthenticationRequest;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,7 +48,7 @@ public class RefreshTokenTest extends BaseTest {
     public void testRestTokenRefresh() throws InterruptedException {
 
         final var method = "rest-arachne";
-        var authRequest = new AuthenticationRequest(arachneUsername, arachnePassword);
+        var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String token = userInfo.getToken();
