@@ -1,0 +1,18 @@
+version: 1
+
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: cn=user,ou=users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: user
+sn: Doe
+displayName: John
+uid: user
+userPassword: {SHA256}pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM=
+
