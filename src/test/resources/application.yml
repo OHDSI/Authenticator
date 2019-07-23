@@ -76,10 +76,25 @@ authenticator:
         password: secret
         url: ldap://localhost:10389
         searchFilter: uid={0}
-        countLimit: 1
+        countLimit: 0
         ignorePartialResultException: true
         fieldsToExtract:
           firstName: displayName
+          lastName: sn
+    ad:
+      service: org.ohdsi.authenticator.service.directory.ad.AdAuthService
+      config:
+        baseDn: DC=example,DC=com
+        # Both formats works for AD either sAMAccountName (with or w/o domainSuffix) and distingueshedName
+        userDn: john.smith
+#        userDn: CN=John Smith,CN=Users,DC=example,DC=com
+        password: password!1
+        domainSuffix: example.com
+        url: ldap://pdc.example.com:389
+        searchFilter: userPrincipalName={0}
+        ignorePartialResultException: true
+        fieldsToExtract:
+          firstName: givenName
           lastName: sn
 security:
   jwt:

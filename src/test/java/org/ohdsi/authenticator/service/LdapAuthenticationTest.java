@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -21,22 +22,30 @@ public class LdapAuthenticationTest extends BaseTest {
 
     private static final String METHOD = "ldap";
 
+    private DirectoryTestOptions options;
+
+    @Before
+    public void before(){
+
+        this.options = getOptions();
+    }
+
     @Test
     public void testAuthSuccess() {
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("user", "123");
-        UserInfo userInfo = authenticator.authenticate(METHOD, credentials);
+        UsernamePasswordCredentials credentials = options.getAcceptableCreds();
+        UserInfo userInfo = authenticator.authenticate(options.getMethod(), credentials);
         assertThat(credentials.getUsername(), is(equalTo(userInfo.getUsername())));
-        assertThat(METHOD, is(equalTo(userInfo.getAuthMethod())));
+        assertThat(options.getMethod(), is(equalTo(userInfo.getAuthMethod())));
         assertThat(userInfo.getToken(), is(notNullValue()));
-        assertThat(userInfo.getAdditionalInfo().get("firstName"), is(equalTo("John")));
-        assertThat(userInfo.getAdditionalInfo().get("lastName"), is(equalTo("Doe")));
+        assertThat(userInfo.getAdditionalInfo().get("firstName"), is(equalTo(options.getFirstName())));
+        assertThat(userInfo.getAdditionalInfo().get("lastName"), is(equalTo(options.getLastName())));
     }
 
     @Test
     public void testAuthFail() {
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("user", "badpassword");
+        UsernamePasswordCredentials credentials = options.getBadCreds();
         boolean isAuthenticated = true;
         try {
             authenticator.authenticate(METHOD, credentials);
@@ -44,6 +53,45 @@ public class LdapAuthenticationTest extends BaseTest {
             isAuthenticated = false;
         }
         assertThat(isAuthenticated, is(equalTo(false)));
+    }
+
+    protected DirectoryTestOptions getOptions() {
+
+        return new DirectoryTestOptions(){
+            @Override
+            public UsernamePasswordCredentials getAcceptableCreds() {
+                return new UsernamePasswordCredentials("user", "123");
+            }
+
+            @Override
+            public UsernamePasswordCredentials getBadCreds() {
+                return new UsernamePasswordCredentials("user", "badpassword");
+            }
+
+            @Override
+            public String getFirstName() {
+                return "John";
+            }
+
+            @Override
+            public String getLastName() {
+                return "Doe";
+            }
+
+            @Override
+            public String getMethod() {
+                return METHOD;
+            }
+        };
+    }
+
+    interface DirectoryTestOptions {
+
+        UsernamePasswordCredentials getAcceptableCreds();
+        UsernamePasswordCredentials getBadCreds();
+        String getFirstName();
+        String getLastName();
+        String getMethod();
     }
 
 }

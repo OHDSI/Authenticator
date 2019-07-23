@@ -34,25 +34,31 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
     protected ContextSource contextSource;
 
     public DirectoryBasedAuthService(T config) {
+
         super(config);
-        initLdap();
+        this.contextSource = initContextSource();
+        this.ldapTemplate = initLdap();
     }
 
-    private void initLdap() {
+    protected ContextSource initContextSource() {
 
-        AbstractContextSource contextSource = new LdapContextSource();
+        LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl(config.getUrl());
         contextSource.setUserDn(config.getUserDn());
         contextSource.setPassword(config.getPassword());
         contextSource.setAuthenticationStrategy(getAuthenticationStrategy());
         contextSource.afterPropertiesSet();
+        return contextSource;
+    }
 
-        ldapTemplate = new LdapTemplate(contextSource);
+    protected LdapTemplate initLdap() {
+
+        ldapTemplate = new LdapTemplate(this.contextSource);
         ldapTemplate.setIgnorePartialResultException(config.isIgnorePartialResultException());
         ldapTemplate.setDefaultCountLimit(config.getCountLimit());
         ldapTemplate.setDefaultTimeLimit(config.getTimeLimit());
 
-        this.contextSource = contextSource;
+        return ldapTemplate;
     }
 
     private DirContextAuthenticationStrategy getAuthenticationStrategy() {
