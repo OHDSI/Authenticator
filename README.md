@@ -109,14 +109,14 @@ authenticator:
 ### LDAP authentication
 
 Authentication across directory requires special system account that used to search across directory.
-`searchFilter` is a formatted LDAP query using to authenticate user. Query should include at least parameter for
-    user who is logging in. Formatted parameters should be encoded like for `MessageFormat.format`. 
-    Query example: `uid={0}`. To succesful authentication `searchFilter` should return exactly one record,
-    if successful authentication service would try to bind to directory using distingueshed name of result node and
+`searchFilter` is a formatted LDAP query used to authenticate user. Query should include at least a parameter for
+    user who is logging in. Formatted parameters should be encoded like for [`MessageFormat.format`](https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html]). 
+    Query example: `uid={0}`. For succesful authentication `searchFilter` should return exactly one record.
+    When single record was found then authentication service would try to bind to directory using distingueshed name of result node and
     provided password. 
 
 `url` defines server URL including protocol and port, e.g. `ldap://localhost:389`
-`baseDn` Distiguesh name of system account having permissions to search across directory
+`userDn` Distiguesh name of system account having permissions to search across directory
 `password` Password of account represented by `baseDn` above
 `baseDn` Distinguesh name of top level tree node that gives subtree to search into  
 `countLimit` reduces count limit of search results, default is 0 meaning no restrictions
@@ -148,7 +148,7 @@ Authentication across directory requires special system account that used to sea
 
 Active Directory mostly is similar to LDAP authentication, except:
 - `baseDn` allows to provide username istead of distingueshed name 
-- `domainSuffix` AD domain name, when is not set `baseDn` should be FQDN, not just login.
+- `domainSuffix` defines AD domain name. When is not set `baseDn` should have format of FQDN (not just login).
 - `ignorePartialResultException` should be set to `true` when authenticating across multi-domain forest
 
 **Note:** When `domainSuffix`
