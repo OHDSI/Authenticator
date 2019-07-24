@@ -88,7 +88,7 @@ authenticator:
         # Both formats works for AD either sAMAccountName (with or w/o domainSuffix) and distingueshedName
         userDn: john.smith
 #        userDn: CN=John Smith,CN=Users,DC=example,DC=com
-        password: password!1
+        password: password
         domainSuffix: example.com
         url: ldap://pdc.example.com:389
         searchFilter: userPrincipalName={0}
