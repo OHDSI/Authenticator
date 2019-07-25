@@ -108,21 +108,21 @@ authenticator:
 ```
 ### LDAP authentication
 
-Authentication across directory requires special system account that used to search across directory.
+Authentication across directory requires special system account that is used to conduct search.
 `searchFilter` is a formatted LDAP query used to authenticate user. Query should include at least a parameter for
-    user who is logging in. Formatted parameters should be encoded like for [`MessageFormat.format`](https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html]). 
-    Query example: `uid={0}`. For succesful authentication `searchFilter` should return exactly one record.
-    When single record was found then authentication service would try to bind to directory using distingueshed name of result node and
+    user who is logging in. Formatted parameters should be encoded to fit [`MessageFormat.format`](https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html]). 
+    Query example: `uid={0}`. For succesful authentication `searchFilter` must return exactly one record.
+    When a single record is found, authentication service will try to bind to directory using distingueshed name of result node and
     provided password. 
 
 `url` defines server URL including protocol and port, e.g. `ldap://localhost:389`
-`userDn` Distiguesh name of system account having permissions to search across directory
-`password` Password of account represented by `baseDn` above
-`baseDn` Distinguesh name of top level tree node that gives subtree to search into  
+`userDn` Distigueshed name of system account having permissions to search across directory
+`password` Password of the account
+`baseDn` Distingueshed name of the top level tree node that gives subtree to search across  
 `countLimit` reduces count limit of search results, default is 0 meaning no restrictions
-`ignorePartialResultException` when set to true partial result exceptions would be ignored, this useful when
+`ignorePartialResultException` when set to true partial result exceptions are ignored, this is useful when
     searching on forest, multi-domain or multi-node directories
- `searchFilter` LDAP query that should return desired user node, authentication fails when query returns no records
+ `searchFilter` LDAP query that should return desired user node, authentication fails when the query returns no records
  
  Sample:
  
@@ -147,8 +147,8 @@ Authentication across directory requires special system account that used to sea
 ### Active Directory authentication
 
 Active Directory mostly is similar to LDAP authentication, except:
-- `baseDn` allows to provide username istead of distingueshed name 
-- `domainSuffix` defines AD domain name. When is not set `baseDn` should have format of FQDN (not just login).
+- `baseDn` allows to provide username instead of distingueshed name 
+- `domainSuffix` defines AD domain name. When is not set `baseDn` must have format of FQDN (not just login).
 - `ignorePartialResultException` should be set to `true` when authenticating across multi-domain forest
 
 **Note:** When `domainSuffix`

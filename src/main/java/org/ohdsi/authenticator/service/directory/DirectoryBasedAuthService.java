@@ -11,7 +11,6 @@ import org.springframework.ldap.core.AuthenticatedLdapEntryContextMapper;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.LdapEntryIdentification;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.core.support.AbstractContextSource;
 import org.springframework.ldap.core.support.DirContextAuthenticationStrategy;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.query.LdapQuery;
