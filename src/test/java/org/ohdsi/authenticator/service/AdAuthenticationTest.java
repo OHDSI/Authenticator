@@ -1,42 +1,32 @@
 package org.ohdsi.authenticator.service;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ohdsi.authenticator.model.UserInfo;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ActiveProfiles(profiles = "test")
+@ActiveProfiles(profiles = { "test", "testad" })
 public class AdAuthenticationTest extends LdapAuthenticationTest {
 
     private final static String METHOD = "ad";
 
-    @Value("${authenticator.methods.ad.config.userDn}")
-    private String userDn;
-    @Value("${authenticator.methods.ad.config.password}")
-    private String password;
+    private String USER_DN = "user";
+    private String PASSWORD = "123";
 
     @Override
     protected DirectoryTestOptions getOptions() {
         return new DirectoryTestOptions() {
             @Override
             public UsernamePasswordCredentials getAcceptableCreds() {
-                return new UsernamePasswordCredentials(userDn, password);
+                return new UsernamePasswordCredentials(USER_DN, PASSWORD);
             }
 
             @Override
             public UsernamePasswordCredentials getBadCreds() {
-                return new UsernamePasswordCredentials(userDn, "badpassword");
+                return new UsernamePasswordCredentials(USER_DN, "badpassword");
             }
 
             @Override
@@ -46,7 +36,7 @@ public class AdAuthenticationTest extends LdapAuthenticationTest {
 
             @Override
             public String getLastName() {
-                return "Smith";
+                return "Doe";
             }
 
             @Override

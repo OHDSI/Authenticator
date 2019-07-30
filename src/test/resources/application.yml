@@ -74,30 +74,26 @@ authenticator:
         baseDn: ou=users,dc=example,dc=com
         userDn: uid=admin,ou=system
         password: secret
-        url: ldap://localhost:10389
+        url: ldap://localhost:8389
         searchFilter: uid={0}
         countLimit: 0
         ignorePartialResultException: true
         fieldsToExtract:
           firstName: displayName
           lastName: sn
-    ad:
-      service: org.ohdsi.authenticator.service.directory.ad.AdAuthService
-      config:
-        baseDn: DC=example,DC=com
-        # Both formats works for AD either sAMAccountName (with or w/o domainSuffix) and distingueshedName
-        userDn: john.smith
-#        userDn: CN=John Smith,CN=Users,DC=example,DC=com
-        password: password
-        domainSuffix: example.com
-        url: ldap://pdc.example.com:389
-        searchFilter: userPrincipalName={0}
-        ignorePartialResultException: true
-        fieldsToExtract:
-          firstName: givenName
-          lastName: sn
 security:
   jwt:
     token:
       secretKey: 129DF19C8A91AFD8375A2826A33539K01ACQ778QOJFAA9MGWLWH73PLXVFVHBR7860MTIE2O8EEVF9KCO77P6A7NUNX4XHAGCRFSBWG879XPDOIN6C2LFCKJI002OIABS4D6Q9VMJJIX8UCE48EF
       validityInSeconds: 60
+spring:
+  ldap:
+    embedded:
+      base-dn: dc=example,dc=com
+      credential:
+        username: uid=admin,ou=system
+        password: secret
+      ldif: classpath:users.ldif
+      port: 8389
+      validation:
+        enabled: true

@@ -1,0 +1,38 @@
+version: 1
+
+dn: DC=example,DC=com
+objectclass: top
+objectclass: domain
+objectclass: extensibleObject
+dc: example
+
+dn: OU=Users,DC=example,DC=com
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: CN=Administrator,OU=Users,DC=example,DC=com
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: top
+cn: Administrator
+givenName: FirstName
+initials: Middle
+uid: administrator@example.com
+sn: LastName
+userPassword: secret
+
+dn: CN=User,OU=users,DC=example,DC=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: User
+sn: Doe
+givenName: John
+uid: user@example.com
+# due to bug Spring Embedded Ldap does not support encrypted passwords
+# https://github.com/pingidentity/ldapsdk/issues/32
+userPassword: 123
+
