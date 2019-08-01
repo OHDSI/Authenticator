@@ -8,6 +8,8 @@ Currently supported methods:
 - Database (JDBC)
 - REST
 - Github
+- LDAP
+- Active Directory
 
 ## Configuration
 
