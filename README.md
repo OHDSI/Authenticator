@@ -112,11 +112,11 @@ Authentication across directory requires special system account that is used to 
 `searchFilter` is a formatted LDAP query used to authenticate user. Query should include at least a parameter for
     user who is logging in. Formatted parameters should be encoded to fit [`MessageFormat.format`](https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html]). 
     Query example: `uid={0}`. For succesful authentication `searchFilter` must return exactly one record.
-    When a single record is found, authentication service will try to bind to directory using distingueshed name of result node and
+    When a single record is found, authentication service will try to bind to directory using distinguished name of result node and
     provided password. 
 
 `url` defines server URL including protocol and port, e.g. `ldap://localhost:389`
-`userDn` Distigueshed name of system account having permissions to search across directory
+`userDn` Distinguished name of system account having permissions to search across directory
 `password` Password of the account
 `baseDn` Distingueshed name of the top level tree node that gives subtree to search across  
 `countLimit` reduces count limit of search results, default is 0 meaning no restrictions
@@ -147,7 +147,7 @@ Authentication across directory requires special system account that is used to 
 ### Active Directory authentication
 
 Active Directory mostly is similar to LDAP authentication, except:
-- `baseDn` allows to provide username instead of distingueshed name 
+- `baseDn` allows to provide username instead of distinguished name 
 - `domainSuffix` defines AD domain name. When is not set `baseDn` must have format of FQDN (not just login).
 - `ignorePartialResultException` should be set to `true` when authenticating across multi-domain forest
 
