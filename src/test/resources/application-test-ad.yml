@@ -1,0 +1,11 @@
+spring:
+  ldap:
+    embedded:
+      base-dn: DC=example,DC=com
+      credential:
+        username: CN=John Smith,CN=Users,DC=example,DC=com
+        password: password
+      ldif: classpath:ad-users.ldif
+      port: 9389
+      validation:
+        enabled: true

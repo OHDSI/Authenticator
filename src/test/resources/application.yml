@@ -68,7 +68,36 @@ authenticator:
         fieldsToExtract:
           firstName: name.split(' ')[0]
           lastName: name.split(' ')[1]
-
+    ldap:
+      service: org.ohdsi.authenticator.service.directory.ldap.LdapAuthService
+      config:
+        baseDn: ou=users,dc=example,dc=com
+        userDn: uid=admin,ou=system
+        password: secret
+        url: ldap://localhost:8389
+        searchFilter: uid={0}
+        countLimit: 0
+        ignorePartialResultException: true
+        fieldsToExtract:
+          firstName: displayName
+          lastName: sn
+    ad:
+      service: org.ohdsi.authenticator.service.directory.ad.AdAuthService
+      config:
+        baseDn: DC=example,DC=com
+        # Both formats works for AD either sAMAccountName (with or w/o domainSuffix) and distingueshedName
+        #userDn: administrator
+        userDn: CN=Administrator,OU=Users,DC=example,DC=com
+        password: secret
+        domainSuffix: example.com
+        url: ldap://localhost:9389
+        # For real AD userPrincipalName attribute should be used
+        #searchFilter: userPrincipalName={0}
+        searchFilter: uid={0}
+        ignorePartialResultException: true
+        fieldsToExtract:
+          firstName: givenName
+          lastName: sn
 security:
   jwt:
     token:
