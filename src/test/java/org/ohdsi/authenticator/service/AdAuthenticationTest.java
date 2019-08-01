@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ActiveProfiles(profiles = { "test", "testad" })
+@ActiveProfiles(profiles = { "test", "test-ad" })
 public class AdAuthenticationTest extends LdapAuthenticationTest {
 
     private final static String METHOD = "ad";

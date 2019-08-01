@@ -17,7 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ActiveProfiles(profiles = "test")
+@ActiveProfiles(profiles = { "test", "test-ldap" })
 public class LdapAuthenticationTest extends BaseTest {
 
     private static final String METHOD = "ldap";
