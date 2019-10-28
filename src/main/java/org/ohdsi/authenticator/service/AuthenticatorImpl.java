@@ -27,12 +27,12 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
 
     private AuthSchema authSchema;
-    private JwtTokenProvider jwtTokenProvider;
+    private AbstractTokenProvider jwtTokenProvider;
     private ObjectMapper objectMapper;
 
     private Map<String, AuthService> authServices = new HashMap<>();
 
-    public AuthenticatorImpl(AuthSchema authSchema, JwtTokenProvider jwtTokenProvider) {
+    public AuthenticatorImpl(AuthSchema authSchema, AbstractTokenProvider jwtTokenProvider) {
 
         this.authSchema = authSchema;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -66,7 +66,7 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     @Override
     public UserInfo resolveUser(String token) {
 
-        val claims = jwtTokenProvider.resolveClaims(token);
+        val claims = jwtTokenProvider.validateAndResolveClaims(token);
         val usedMethod = claims.getBody().get(METHOD_KEY, String.class);
         val subject = claims.getBody().getSubject();
         var userInfo = new UserInfo();
@@ -95,14 +95,14 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     @Override
     public <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass) {
 
-        var claims = jwtTokenProvider.resolveClaims(token);
+        var claims = jwtTokenProvider.validateAndResolveClaims(token);
         return claims.getBody().get(key, valueClass);
     }
 
     @Override
     public UserInfo refreshToken(String token) {
 
-        var claims = jwtTokenProvider.resolveClaims(token);
+        var claims = jwtTokenProvider.validateAndResolveClaims(token);
         var usedMethod = claims.getBody().get(METHOD_KEY, String.class);
         var authService = getForMethod(usedMethod);
         var authentication = authService.refreshToken(claims);

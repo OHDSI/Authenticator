@@ -14,6 +14,7 @@ public class BaseTest {
 
     protected long getExpirationInSecs(String token) {
 
-        return (jwtTokenProvider.getExpDate(token).getTime() - new Date().getTime()) / 1000;
+        long expirationDateTimeFromToken = jwtTokenProvider.validateAndResolveClaims(token).getBody().getExpiration().getTime();
+        return (expirationDateTimeFromToken - new Date().getTime()) / 1000;
     }
 }

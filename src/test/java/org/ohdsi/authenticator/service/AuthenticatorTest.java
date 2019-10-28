@@ -23,14 +23,14 @@ public class AuthenticatorTest extends BaseTest {
     @Test
     public void testUserResolvedSuccessfully() {
 
-        String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>());
+        String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>(), null);
         Assert.isTrue(Objects.equals(USERNAME, tokenService.resolveUser(token).getUsername()), "Cannot resolve user from token");
     }
 
     @Test
     public void testUserResolutionFailure() {
 
-        String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>());
+        String token = jwtTokenProvider.createToken(USERNAME, new HashMap<>(), null);
         Assert.isTrue(!Objects.equals("dummy", tokenService.resolveUser(token).getUsername()), "Resolved user from wrong token");
     }
 }

@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.Getter;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,33 +12,26 @@ import org.springframework.stereotype.Component;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Component
-public class JwtTokenProvider {
-
-    private static final String INVALID_TOKEN_ERROR = "Expired or invalid JWT token";
-
-    private Set<String> invalidatedTokens = new HashSet<>();
+public class JwtTokenProvider extends AbstractTokenProvider {
 
     @Value("${security.jwt.token.secretKey}")
     private String secretKey;
 
     @Value("${security.jwt.token.validityInSeconds}")
+    @Getter
     private long validityInSeconds;
 
-    String createToken(String username, Map<String, String> userAdditionalInfo) {
+    @Override
+    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
 
-        return createToken(username, userAdditionalInfo, null);
-    }
-
-    String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
-
-        Claims claims = Jwts.claims().setSubject(username);
-        claims.putAll(userAdditionalInfo);
+        Claims claims = Jwts.claims();
+        claims
+                .setSubject(username)
+                .putAll(userAdditionalInfo);
 
         Date now = new Date();
         expirationDate = Optional.ofNullable(expirationDate).orElseGet(this::getDefaultExpDate);
@@ -50,37 +44,15 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    void invalidateToken(String token) {
-
-        invalidatedTokens.add(token);
-    }
-
-    Jws<Claims> resolveClaims(String token) {
-
-        if (invalidatedTokens.contains(token)) {
-            throw new AuthenticationException(INVALID_TOKEN_ERROR);
-        }
-
+    public Jws<Claims> validateAndResolveClaimsInner(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
-            return claims;
+            return Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
         } catch (Exception ex) {
             throw new AuthenticationException(INVALID_TOKEN_ERROR);
         }
     }
 
-    long getDefaultValidityInSeconds() {
-
-        return validityInSeconds;
-    }
-
-    Date getExpDate(String token) {
-
-        return resolveClaims(token).getBody().getExpiration();
-    }
-
     private Key getKey() {
-
         return new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 

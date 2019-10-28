@@ -38,8 +38,8 @@ public class RefreshTokenTest extends BaseTest {
         String newToken = authenticator.refreshToken(token).getToken();
         long newExpInSecs = getExpirationInSecs(newToken);
         Assert.isTrue(
-            newExpInSecs >= DUMMY_EXP_IN_SEC && newExpInSecs <= jwtTokenProvider.getDefaultValidityInSeconds()
-            && Objects.equals(jwtTokenProvider.resolveClaims(newToken).getBody().get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
+            newExpInSecs >= DUMMY_EXP_IN_SEC && newExpInSecs <= jwtTokenProvider.getValidityInSeconds()
+            && Objects.equals(jwtTokenProvider.validateAndResolveClaims(newToken).getBody().get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
             "Token hasn't been refreshed"
         );
     }
@@ -52,16 +52,18 @@ public class RefreshTokenTest extends BaseTest {
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String token = userInfo.getToken();
-        Date originalExpDate = jwtTokenProvider.getExpDate(token);
+
+        Date originalExpDate = jwtTokenProvider.validateAndResolveClaims(token).getBody().getExpiration();
 
         Thread.sleep(1000L);
 
         String newToken = authenticator.refreshToken(token).getToken();
-        Date newExpDate = jwtTokenProvider.getExpDate(newToken);
+
+        Date newExpDate = jwtTokenProvider.validateAndResolveClaims(newToken).getBody().getExpiration();
         long newExpInSecs = getExpirationInSecs(newToken);
 
         Assert.isTrue(
-            newExpInSecs > jwtTokenProvider.getDefaultValidityInSeconds()
+            newExpInSecs > jwtTokenProvider.getValidityInSeconds()
             && originalExpDate.before(newExpDate),
             "Token hasn't been refreshed"
         );
