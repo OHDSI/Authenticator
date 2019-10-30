@@ -3,9 +3,8 @@ package org.ohdsi.authenticator.service;
 import org.ohdsi.authenticator.model.UserInfo;
 
 public interface TokenService {
-    UserInfo resolveUser(String token);
 
-    String resolveAdditionalInfoAsString(String token, String key);
+    UserInfo resolveUser(AccessToken token);
 
-    <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass);
+    <T> T resolveAdditionalInfo(AccessToken token, String key, Class<T> valueClass);
 }

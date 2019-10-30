@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class JwtTokenProvider extends AbstractTokenProvider {
+public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
 
     @Value("${security.jwt.token.secretKey}")
     private String secretKey;
@@ -26,7 +26,7 @@ public class JwtTokenProvider extends AbstractTokenProvider {
     private long validityInSeconds;
 
     @Override
-    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    public AccessToken createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
 
         Claims claims = Jwts.claims();
         claims
@@ -36,17 +36,19 @@ public class JwtTokenProvider extends AbstractTokenProvider {
         Date now = new Date();
         expirationDate = Optional.ofNullable(expirationDate).orElseGet(this::getDefaultExpDate);
 
-        return Jwts.builder()
+        String tokenValue = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
                 .signWith(getKey())
                 .compact();
+        return AccessToken.jwt(tokenValue);
     }
 
-    public Jws<Claims> validateAndResolveClaimsInner(String token) {
+    public Claims validateAndResolveClaimsInternal(AccessToken token) {
         try {
-            return Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
+            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token.getValue());
+            return claimsJws.getBody();
         } catch (Exception ex) {
             throw new AuthenticationException(INVALID_TOKEN_ERROR);
         }

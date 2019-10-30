@@ -1,6 +1,7 @@
 package org.ohdsi.authenticator.service;
 
 import lombok.var;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
 import java.util.Objects;
 
@@ -35,24 +35,22 @@ public class RestAuthenticationTest extends BaseTest {
         final var method = "rest-arachne";
         var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
-        Assert.isTrue(
-                Objects.equals(userInfo.getUsername(), authRequest.getUsername())
-                && getExpirationInSecs(userInfo.getToken()) >= jwtTokenProvider.getValidityInSeconds(),
-                "Failed to authenticate user with proper credentials"
-        );
+
+        AccessToken accessToken = AccessToken.jwt(userInfo.getToken());
+        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
+        Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
+
     }
 
     @Test
     public void testRestAtlasAuthSuccess() {
 
-        final var method = "rest-atlas";
-        var authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
+        final String method = "rest-atlas";
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
-        Assert.isTrue(
-                Objects.equals(userInfo.getUsername(), authRequest.getUsername())
-                && getExpirationInSecs(userInfo.getToken()) <= jwtTokenProvider.getValidityInSeconds(),
-                "Failed to authenticate user with proper credentials"
-        );
+        AccessToken accessToken = AccessToken.jwt(userInfo.getToken());
+        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
+        Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
     }
 
     @Test
@@ -67,6 +65,6 @@ public class RestAuthenticationTest extends BaseTest {
             failed = true;
         }
 
-        Assert.isTrue(failed, "Authenticated user with bad credentials");
+        Assert.assertTrue("Authenticated user with bad credentials", failed);
     }
 }

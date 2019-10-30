@@ -6,4 +6,12 @@ public class AuthenticationException extends RuntimeException {
 
         super(message);
     }
+
+    public AuthenticationException(Throwable throwable) {
+        super(throwable);
+    }
+
+    public AuthenticationException(String s, Throwable throwable) {
+        super(s, throwable);
+    }
 }

@@ -22,7 +22,7 @@ public class InvalidationTokenTest extends BaseTest {
     @Test
     public void invalidateTokenTest() {
 
-        String token = createDummyToken();
+        AccessToken token = createDummyToken();
         Assert.isTrue(Objects.equals(DUMMY_USERNAME, authenticator.resolveUsername(token)), "Cannot resolve username from proper token");
 
         authenticator.invalidateToken(token);
@@ -37,7 +37,7 @@ public class InvalidationTokenTest extends BaseTest {
         Assert.isTrue(invalidToken, "Token was not invalidated");
     }
 
-    private String createDummyToken() {
+    private AccessToken createDummyToken() {
 
         return jwtTokenProvider.createToken(DUMMY_USERNAME, new HashMap<>(), new Date(new Date().getTime() + 600 * 1000));
     }

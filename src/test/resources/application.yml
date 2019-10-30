@@ -1,9 +1,10 @@
+
 authenticator:
   methods:
     db:
       service: org.ohdsi.authenticator.service.jdbc.JdbcAuthService
       config:
-        jdbcUrl: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+        jdbcUrl: jdbc:h2:mem:testdb;MODE=PostgreSQL
         username: sa
         password:
         query: SELECT password, first_name, middle_name, last_name FROM USERS WHERE USERNAME = :username
@@ -103,3 +104,8 @@ security:
     token:
       secretKey: 129DF19C8A91AFD8375A2826A33539K01ACQ778QOJFAA9MGWLWH73PLXVFVHBR7860MTIE2O8EEVF9KCO77P6A7NUNX4XHAGCRFSBWG879XPDOIN6C2LFCKJI002OIABS4D6Q9VMJJIX8UCE48EF
       validityInSeconds: 60
+
+# schema and data script run for any test, this is a workaround
+spring:
+  datasource:
+    continue-on-error: true

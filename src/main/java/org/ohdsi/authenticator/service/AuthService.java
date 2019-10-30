@@ -27,12 +27,12 @@ public abstract class AuthService<T extends AuthServiceConfig> {
 
     abstract public AuthenticationToken authenticate(Credentials credentials);
 
-    public AuthenticationToken refreshToken(Jws<Claims> claims) {
+    public AuthenticationToken refreshToken(Claims claims) {
 
         return new AuthenticationBuilder()
             .setAuthenticated(true)
-            .setUsername(claims.getBody().getSubject())
-            .setUserDetails((Map) claims.getBody())
+            .setUsername(claims.getSubject())
+            .setUserDetails((Map) claims)
             .build();
     }
 

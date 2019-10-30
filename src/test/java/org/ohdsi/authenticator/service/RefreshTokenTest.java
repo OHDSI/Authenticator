@@ -33,13 +33,14 @@ public class RefreshTokenTest extends BaseTest {
     @Test
     public void testDefaultTokenRefresh() {
 
-        String token = createDummyToken("db");
+        AccessToken token = createDummyToken("db");
         Assert.isTrue(getExpirationInSecs(token) <= DUMMY_EXP_IN_SEC, "Wrong dummy token");
-        String newToken = authenticator.refreshToken(token).getToken();
+        AccessToken newToken = AccessToken.jwt(authenticator.refreshToken(token).getToken());
+
         long newExpInSecs = getExpirationInSecs(newToken);
         Assert.isTrue(
             newExpInSecs >= DUMMY_EXP_IN_SEC && newExpInSecs <= jwtTokenProvider.getValidityInSeconds()
-            && Objects.equals(jwtTokenProvider.validateAndResolveClaims(newToken).getBody().get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
+            && Objects.equals(jwtTokenProvider.validateTokenAndGetClaims(newToken).get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
             "Token hasn't been refreshed"
         );
     }
@@ -48,18 +49,18 @@ public class RefreshTokenTest extends BaseTest {
     public void testRestTokenRefresh() throws InterruptedException {
 
         final var method = "rest-arachne";
-        var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
-        String token = userInfo.getToken();
+        AccessToken token = AccessToken.jwt(userInfo.getToken());
 
-        Date originalExpDate = jwtTokenProvider.validateAndResolveClaims(token).getBody().getExpiration();
+        Date originalExpDate = jwtTokenProvider.validateTokenAndGetClaims(token).getExpiration();
 
         Thread.sleep(1000L);
 
-        String newToken = authenticator.refreshToken(token).getToken();
+        AccessToken newToken =  AccessToken.jwt(authenticator.refreshToken(token).getToken());
 
-        Date newExpDate = jwtTokenProvider.validateAndResolveClaims(newToken).getBody().getExpiration();
+        Date newExpDate = jwtTokenProvider.validateTokenAndGetClaims(newToken).getExpiration();
         long newExpInSecs = getExpirationInSecs(newToken);
 
         Assert.isTrue(
@@ -69,7 +70,7 @@ public class RefreshTokenTest extends BaseTest {
         );
     }
 
-    private String createDummyToken(String forMethod) {
+    private AccessToken createDummyToken(String forMethod) {
 
         return jwtTokenProvider.createToken(
             "dummy",

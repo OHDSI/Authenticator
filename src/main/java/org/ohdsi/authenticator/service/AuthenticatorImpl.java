@@ -3,7 +3,6 @@ package org.ohdsi.authenticator.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import lombok.val;
 import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -20,22 +19,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthenticatorImpl implements Authenticator, TokenService {
+public class AuthenticatorImpl implements Authenticator {
 
-    private static final String METHOD_KEY = "method";
+    public static final String METHOD_KEY = "method";
     private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
     private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
 
     private AuthSchema authSchema;
-    private AbstractTokenProvider jwtTokenProvider;
+    private TokenService tokenService;
+    private TokenProvider tokenProvider;
     private ObjectMapper objectMapper;
 
     private Map<String, AuthService> authServices = new HashMap<>();
 
-    public AuthenticatorImpl(AuthSchema authSchema, AbstractTokenProvider jwtTokenProvider) {
+    public AuthenticatorImpl(AuthSchema authSchema, TokenService tokenService, TokenProviderDecorator tokenProvider) {
 
         this.authSchema = authSchema;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenService = tokenService;
+        this.tokenProvider = tokenProvider;
     }
 
     @PostConstruct
@@ -48,13 +49,13 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
-        var authService = getForMethod(method);
+        AuthService authService = getForMethod(method);
 
         if (authService == null) {
             throw new AuthenticationException(METHOD_NOT_SUPPORTED_ERROR);
         }
 
-        var authentication = authService.authenticate(request);
+        AuthenticationToken authentication = authService.authenticate(request);
 
         if (!authentication.isAuthenticated()) {
             throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
@@ -64,55 +65,27 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
     }
 
     @Override
-    public UserInfo resolveUser(String token) {
+    public String resolveUsername(AccessToken token) {
 
-        val claims = jwtTokenProvider.validateAndResolveClaims(token);
-        val usedMethod = claims.getBody().get(METHOD_KEY, String.class);
-        val subject = claims.getBody().getSubject();
-        var userInfo = new UserInfo();
-        userInfo.setUsername(subject);
-        userInfo.setAuthMethod(usedMethod);
-        userInfo.setToken(token);
-        claims.getBody().keySet().stream()
-                .filter(key -> !Claims.SUBJECT.equals(key))
-                .forEach(key -> userInfo.getAdditionalInfo()
-                        .put(key, claims.getBody().get(key)));
-        return userInfo;
+        return tokenService.resolveAdditionalInfo(token, Claims.SUBJECT, String.class);
     }
 
-    @Override
-    public String resolveUsername(String token) {
-
-        return resolveAdditionalInfoAsString(token, Claims.SUBJECT);
-    }
 
     @Override
-    public String resolveAdditionalInfoAsString(String token, String key) {
+    public UserInfo refreshToken(AccessToken token) {
 
-        return resolveAdditionalInfo(token, key, String.class);
-    }
+        Claims claims = tokenProvider.validateTokenAndGetClaims(token);
 
-    @Override
-    public <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass) {
-
-        var claims = jwtTokenProvider.validateAndResolveClaims(token);
-        return claims.getBody().get(key, valueClass);
-    }
-
-    @Override
-    public UserInfo refreshToken(String token) {
-
-        var claims = jwtTokenProvider.validateAndResolveClaims(token);
-        var usedMethod = claims.getBody().get(METHOD_KEY, String.class);
-        var authService = getForMethod(usedMethod);
-        var authentication = authService.refreshToken(claims);
+        String usedMethod = claims.get(METHOD_KEY, String.class);
+        AuthService authService = getForMethod(usedMethod);
+        AuthenticationToken authentication = authService.refreshToken(claims);
         return buildUserInfo(authentication, usedMethod);
     }
 
     @Override
-    public void invalidateToken(String token) {
+    public void invalidateToken(AccessToken token) {
 
-        jwtTokenProvider.invalidateToken(token);
+        tokenProvider.invalidateToken(token);
     }
 
     private void initObjectMapper() {
@@ -174,9 +147,9 @@ public class AuthenticatorImpl implements Authenticator, TokenService {
         Map userAdditionalInfo = (Map) authentication.getDetails();
         userAdditionalInfo.put(METHOD_KEY, method);
 
-        String token = jwtTokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
+        AccessToken token = tokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
 
-        var userInfo = resolveUser(token);
+        var userInfo = tokenService.resolveUser(token);
         userInfo.setAdditionalInfo(userAdditionalInfo);
 
         return userInfo;
