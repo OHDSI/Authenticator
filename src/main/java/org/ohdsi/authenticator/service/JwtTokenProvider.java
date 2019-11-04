@@ -26,7 +26,7 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
     private long validityInSeconds;
 
     @Override
-    public AccessToken createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    public AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
 
         Claims claims = Jwts.claims();
         claims
@@ -43,6 +43,11 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
                 .signWith(getKey())
                 .compact();
         return AccessToken.jwt(tokenValue);
+    }
+
+    @Override
+    public boolean isTokenRefreshable(AccessToken token) {
+        return true;
     }
 
     public Claims validateAndResolveClaimsInternal(AccessToken token) {

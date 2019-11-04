@@ -11,5 +11,7 @@ public interface TokenProvider {
 
     Claims validateTokenAndGetClaims(AccessToken token);
 
-    AccessToken createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate);
+    AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate);
+
+    boolean isTokenRefreshable(AccessToken token);
 }

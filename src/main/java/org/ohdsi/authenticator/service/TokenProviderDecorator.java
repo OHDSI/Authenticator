@@ -28,8 +28,16 @@ public class TokenProviderDecorator implements TokenProvider {
     }
 
     @Override
-    public AccessToken createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
-        return jwtTokenProvider.createToken(username, userAdditionalInfo, expirationDate);
+    public AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+        if (type == AccessToken.Type.IAP) {
+            return googleIapTokenProvider.createToken(type, username, userAdditionalInfo, expirationDate);
+        }
+        return jwtTokenProvider.createToken(type, username, userAdditionalInfo, expirationDate);
+    }
+
+    @Override
+    public boolean isTokenRefreshable(AccessToken type) {
+        return getProviderByType(type).isTokenRefreshable(type);
     }
 
     private TokenProvider getProviderByType(AccessToken token) {

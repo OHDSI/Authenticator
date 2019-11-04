@@ -3,6 +3,11 @@ package org.ohdsi.authenticator.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -12,15 +17,8 @@ import org.pac4j.core.credentials.Credentials;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
-import javax.annotation.PostConstruct;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 public class AuthenticatorImpl implements Authenticator {
-
     public static final String METHOD_KEY = "method";
     private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
     private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
@@ -48,7 +46,6 @@ public class AuthenticatorImpl implements Authenticator {
 
     @Override
     public UserInfo authenticate(String method, Credentials request) {
-
         AuthService authService = getForMethod(method);
 
         if (authService == null) {
@@ -66,7 +63,6 @@ public class AuthenticatorImpl implements Authenticator {
 
     @Override
     public String resolveUsername(AccessToken token) {
-
         return tokenService.resolveAdditionalInfo(token, Claims.SUBJECT, String.class);
     }
 
@@ -74,8 +70,10 @@ public class AuthenticatorImpl implements Authenticator {
     @Override
     public UserInfo refreshToken(AccessToken token) {
 
+        if (!tokenProvider.isTokenRefreshable(token)){
+            return tokenService.resolveUser(token);
+        }
         Claims claims = tokenProvider.validateTokenAndGetClaims(token);
-
         String usedMethod = claims.get(METHOD_KEY, String.class);
         AuthService authService = getForMethod(usedMethod);
         AuthenticationToken authentication = authService.refreshToken(claims);
@@ -147,7 +145,8 @@ public class AuthenticatorImpl implements Authenticator {
         Map userAdditionalInfo = (Map) authentication.getDetails();
         userAdditionalInfo.put(METHOD_KEY, method);
 
-        AccessToken token = tokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
+        AccessToken.Type type = AccessTokenResolver.getTypeByAuthMethod(method);
+        AccessToken token = tokenProvider.createToken(type, username, userAdditionalInfo, authentication.getExpirationDate());
 
         var userInfo = tokenService.resolveUser(token);
         userInfo.setAdditionalInfo(userAdditionalInfo);

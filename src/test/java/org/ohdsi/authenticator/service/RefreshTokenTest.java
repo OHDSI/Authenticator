@@ -73,12 +73,13 @@ public class RefreshTokenTest extends BaseTest {
     private AccessToken createDummyToken(String forMethod) {
 
         return jwtTokenProvider.createToken(
-            "dummy",
-            new HashMap<String, String>() {{
-                put(METHOD_PROP_KEY, forMethod);
-                put(DUMMY_PROP_KEY, DUMMY_PROP_VAL);
-            }},
-            new Date(new Date().getTime() + DUMMY_EXP_IN_SEC * 1000)
+                AccessToken.Type.JWT,
+                "dummy",
+                new HashMap<String, String>() {{
+                    put(METHOD_PROP_KEY, forMethod);
+                    put(DUMMY_PROP_KEY, DUMMY_PROP_VAL);
+                }},
+                new Date(new Date().getTime() + DUMMY_EXP_IN_SEC * 1000)
         );
     }
 }

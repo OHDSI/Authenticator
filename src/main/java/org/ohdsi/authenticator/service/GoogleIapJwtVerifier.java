@@ -9,9 +9,6 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.springframework.stereotype.Component;
-
 import java.net.URL;
 import java.security.interfaces.ECPublicKey;
 import java.time.Clock;
@@ -19,6 +16,8 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.ohdsi.authenticator.exception.AuthenticationException;
+import org.springframework.stereotype.Component;
 
 @Component
 public class GoogleIapJwtVerifier {
