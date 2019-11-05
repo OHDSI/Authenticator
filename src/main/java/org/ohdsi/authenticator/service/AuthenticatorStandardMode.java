@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import lombok.var;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
@@ -149,7 +148,7 @@ public class AuthenticatorStandardMode implements Authenticator {
 
         String token = tokenProvider.createToken(username, userAdditionalInfo, authentication.getExpirationDate());
 
-        var userInfo = tokenService.resolveUser(token);
+        UserInfo userInfo = tokenService.resolveUser(token);
         userInfo.setAdditionalInfo(userAdditionalInfo);
 
         return userInfo;

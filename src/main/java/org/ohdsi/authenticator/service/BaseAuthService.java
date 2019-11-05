@@ -12,13 +12,13 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public abstract class AuthServiceBase<T extends AuthServiceConfig> implements AuthService<T>{
+public abstract class BaseAuthService<T extends AuthServiceConfig> implements AuthService<T>{
 
     protected static final String INFO_EXTRACTION_ERROR = "Cannot extract user info";
 
     protected T config;
 
-    public AuthServiceBase(T config) {
+    public BaseAuthService(T config) {
 
         this.config = config;
     }

@@ -15,7 +15,7 @@ import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthServiceBase;
+import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
@@ -31,7 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-public class RestAuthService extends AuthServiceBase<RestAuthServiceConfig> {
+public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private static final String TOKEN_KEY = "token";
 
@@ -53,15 +53,15 @@ public class RestAuthService extends AuthServiceBase<RestAuthServiceConfig> {
         HttpEntity httpEntity = new HttpEntity(formatBody(body, headers.getContentType()), headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(config.getUrl(), HttpMethod.POST, httpEntity, String.class);
 
-        var isAuthenticated = isSuccessfulLogin(responseEntity);
-        var authBuilder = new AuthenticationBuilder()
+        boolean isAuthenticated = isSuccessfulLogin(responseEntity);
+        AuthenticationBuilder authBuilder = new AuthenticationBuilder()
                 .setAuthenticated(isAuthenticated)
                 .setUsername(creds.getUsername());
 
         if (isAuthenticated) {
             String remoteToken = extractRemoteToken(responseEntity, config.getToken());
 
-            var details = Stream.of(remoteToken)
+            Map<String, String> details = Stream.of(remoteToken)
                     .map(this::queryUserInfo)
                     .map(this::extractUserDetails)
                     .findFirst().orElseThrow(() -> new AuthenticationException(INFO_EXTRACTION_ERROR));
@@ -198,7 +198,7 @@ public class RestAuthService extends AuthServiceBase<RestAuthServiceConfig> {
     private Map<String, String> extractUserDetails(ResponseEntity<String> responseEntity) {
 
         try {
-            var responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
+            Map<?,?> responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
             return extractUserDetails(responseBodyJson);
         } catch (Exception ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);

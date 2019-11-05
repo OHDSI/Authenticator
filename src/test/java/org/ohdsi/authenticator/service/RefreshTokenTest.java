@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.model.UserInfo;
@@ -51,7 +50,7 @@ public class RefreshTokenTest extends BaseTest {
     @Test
     public void testRestTokenRefresh() throws InterruptedException {
 
-        final var method = "rest-arachne";
+        final String method = "rest-arachne";
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 

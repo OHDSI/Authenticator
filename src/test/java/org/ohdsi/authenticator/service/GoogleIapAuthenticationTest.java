@@ -7,16 +7,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ohdsi.authenticator.Application;
+import org.ohdsi.authenticator.config.AuthenticatorConfiguration;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.support.GoogleIapTestUtils;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles(profiles = { "test", "test-iap" })
 public class GoogleIapAuthenticationTest extends BaseTest {
@@ -40,18 +44,31 @@ public class GoogleIapAuthenticationTest extends BaseTest {
     }
 
 
-    @Test(expected = AuthenticationException.class)
-    public void testResolveAndRefreshToken() {
-
+    @Test
+    public void testResolve() {
         String accessToken = createAccessToken();
 
         String username = authenticator.resolveUsername(accessToken);
         Assert.assertEquals("login@gmail.com", username);
 
+    }
+
+    @Test
+    public void testResolveAndRefreshToken() {
+
+        String accessToken = createAccessToken();
+
         UserInfo userInfo = authenticator.refreshToken(accessToken);
         Assert.assertEquals(accessToken, userInfo.getToken());
         Assert.assertEquals("login@gmail.com", userInfo.getUsername());
 
+    }
+
+
+
+    @Test(expected = AuthenticationException.class)
+    public void testInvalidateToken() {
+        String accessToken = createAccessToken();
         authenticator.invalidateToken(accessToken);
 
         //this operation throws an exception because of token already invalid

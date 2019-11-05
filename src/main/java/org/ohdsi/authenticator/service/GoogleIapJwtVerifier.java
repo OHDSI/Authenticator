@@ -19,8 +19,6 @@ import java.util.Map;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-@Component
-
 public class GoogleIapJwtVerifier {
 
     private static final String PUBLIC_KEY_VERIFICATION_URL = "https://www.gstatic.com/iap/verify/public_key-jwk";

@@ -1,9 +1,11 @@
 package org.ohdsi.authenticator.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.Date;
+import org.ohdsi.authenticator.config.AuthenticatorConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest(classes = {TestConfiguration.class, AuthenticatorConfiguration.class})
 public class BaseTest {
 
     @Autowired

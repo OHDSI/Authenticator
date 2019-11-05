@@ -23,7 +23,7 @@ public class AuthenticatorProxyMode implements Authenticator {
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
-        throw new AuthenticationException("authentication is delegated to the proxy level, for PROXY authentication mode");
+        throw new AuthenticationException("Authentication is delegated to the proxy level, for PROXY authentication modeю");
     }
 
     @Override

@@ -14,8 +14,8 @@ public class TokenServiceImpl implements TokenService {
 
     private TokenProvider tokenProvider;
 
-    public TokenServiceImpl(TokenProvider tokenProviderDecorator) {
-        this.tokenProvider = tokenProviderDecorator;
+    public TokenServiceImpl(TokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
     }
 
     @Override

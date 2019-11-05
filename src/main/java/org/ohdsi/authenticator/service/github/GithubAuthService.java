@@ -4,7 +4,7 @@ import com.github.scribejava.apis.GitHubApi;
 import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthServiceBase;
+import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.oauth.client.OAuth20Client;
@@ -16,7 +16,7 @@ import org.pac4j.oauth.profile.github.GitHubProfileDefinition;
 import java.util.Map;
 import java.util.Objects;
 
-public class GithubAuthService extends AuthServiceBase<GithubAuthServiceConfig> {
+public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> {
 
     private OAuth20Configuration oAuthConfig;
     private OAuth20Client oAuthClient;
@@ -39,20 +39,20 @@ public class GithubAuthService extends AuthServiceBase<GithubAuthServiceConfig> 
             throw new RedirectRequiredException(authUrl);
         }
 
-        var oAuthCredentials = new OAuth20Credentials(tokenCredentials.getToken());
+        OAuth20Credentials oAuthCredentials = new OAuth20Credentials(tokenCredentials.getToken());
 
         oAuthClient.getAuthenticator().validate(oAuthCredentials, null);
 
-        var profile = (OAuth20Profile) oAuthClient.getProfileCreator()
+        OAuth20Profile profile = (OAuth20Profile) oAuthClient.getProfileCreator()
                 .create(oAuthCredentials, null)
                 .orElseThrow(() -> new AuthenticationException("Cannot retrieve profile"));
 
-        var username = profile.getAttribute(config.getUsernameProperty()).toString();
-        var details = extractUserDetails(profile);
+        Object username = profile.getAttribute(config.getUsernameProperty()).toString();
+        Map<String, String>  details = extractUserDetails(profile);
 
         return new AuthenticationBuilder()
                 .setAuthenticated(true)
-                .setUsername(username)
+                .setUsername(username.toString())
                 .setUserDetails(details)
                 .build();
     }

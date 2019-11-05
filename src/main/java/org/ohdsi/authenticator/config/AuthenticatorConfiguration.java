@@ -23,6 +23,7 @@ public class AuthenticatorConfiguration {
 
         @Bean
         public Authenticator authentication(AuthSchema authSchema, TokenService tokenService, TokenProvider tokenProvider) {
+
             return new AuthenticatorStandardMode(authSchema, tokenService, tokenProvider);
         }
 
@@ -39,7 +40,8 @@ public class AuthenticatorConfiguration {
     public class ProxyMode {
         @Bean
         public Authenticator authentication(TokenService tokenService, TokenProvider tokenProvider) {
-            return new AuthenticatorProxyMode( tokenService, tokenProvider);
+
+            return new AuthenticatorProxyMode(tokenService, tokenProvider);
         }
 
         @Bean
@@ -51,7 +53,8 @@ public class AuthenticatorConfiguration {
         }
 
         @Bean
-        public GoogleIapJwtVerifier googleIapJwtVerifier () {
+        public GoogleIapJwtVerifier googleIapJwtVerifier() {
+
             return new GoogleIapJwtVerifier();
         }
     }

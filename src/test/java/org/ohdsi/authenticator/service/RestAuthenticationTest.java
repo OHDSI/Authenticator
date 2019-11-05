@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +33,8 @@ public class RestAuthenticationTest extends BaseTest {
     @Test
     public void testRestArachneAuthSuccess() {
 
-        final var method = "rest-arachne";
-        var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
+        final String method = "rest-arachne";
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String accessToken = userInfo.getToken();
@@ -58,7 +57,7 @@ public class RestAuthenticationTest extends BaseTest {
     @Test
     public void testRestAuthFailure() {
 
-        var authRequest = new UsernamePasswordCredentials("dummy", "dummy");
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials("dummy", "dummy");
 
         boolean failed = false;
         try {

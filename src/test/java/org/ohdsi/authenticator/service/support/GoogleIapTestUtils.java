@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.time.LocalDateTime;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
@@ -31,16 +32,17 @@ public class GoogleIapTestUtils {
     public static Claims createClaims(String audience) {
         Claims claims = Jwts.claims();
         claims.setSubject("loginFromSubject@gmail.com");
-        claims.setExpiration(toDate(LocalDate.now().plusYears(1)));
+        claims.setExpiration(toDate(LocalDateTime.now().plusYears(1)));
         claims.setAudience(audience);
-        claims.setIssuedAt(toDate(LocalDate.now().minusYears(1)));
+        claims.setIssuedAt(toDate(LocalDateTime.now().minusYears(1)));
         claims.setIssuer("https://cloud.google.com/iap");
         claims.put("email", "login@gmail.com");
         return claims;
     }
 
-    private static Date toDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    private static Date toDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault())
+                        .toInstant());
     }
 
 }

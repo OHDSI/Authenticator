@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -13,7 +12,7 @@ import org.springframework.util.Assert;
 
 import java.util.Objects;
 
-@SpringBootTest
+@SpringBootTest()
 @RunWith(SpringRunner.class)
 @ActiveProfiles(profiles = "test")
 public class DatabaseAuthenticationTest extends BaseTest {
@@ -23,7 +22,7 @@ public class DatabaseAuthenticationTest extends BaseTest {
     @Test
     public void testDbAuthSuccess() {
 
-        var authRequest = new UsernamePasswordCredentials("admin", "password");
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials("admin", "password");
         UserInfo userInfo = authenticator.authenticate(METHOD, authRequest);
         Assert.isTrue(
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
@@ -38,7 +37,7 @@ public class DatabaseAuthenticationTest extends BaseTest {
     @Test
     public void testDbAuthFailure() {
 
-        var authRequest = new UsernamePasswordCredentials("admin", "dummy");
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials("admin", "dummy");
 
         boolean failed = false;
         try {
