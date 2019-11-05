@@ -1,0 +1,6 @@
+security:
+  authentication:
+    mode: PROXY
+  googleIap:
+    cloudProjectId: 42
+    backendServiceId: 42

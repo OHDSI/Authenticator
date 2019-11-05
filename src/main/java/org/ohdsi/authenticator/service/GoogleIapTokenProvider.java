@@ -8,25 +8,24 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     public static final String AUDIENCE_FORMAT = "/projects/%s/global/backendServices/%s";
 
+    private AuthenticationMode authenticationMode;
     private GoogleIapJwtVerifier googleIapJwtVerifier;
     private Long cloudProjectId;
     private Long backendServiceId;
-    private String authMethod;
+
     public GoogleIapTokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
-                                  @Value("${security.method:}") String authMethod,
+                                  @Value("${security.authentication.mode:" + AuthenticationMode.Const.STANDARD + "}") AuthenticationMode authenticationMode,
                                   @Value("${security.googleIap.cloudProjectId:}") Long cloudProjectId,
                                   @Value("${security.googleIap.backendServiceId:}") Long backendServiceId) {
         this.googleIapJwtVerifier = googleIapJwtVerifier;
+        this.authenticationMode = authenticationMode;
         this.cloudProjectId = cloudProjectId;
         this.backendServiceId = backendServiceId;
-        this.authMethod = authMethod;
     }
 
     @PostConstruct
@@ -43,29 +42,20 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
     }
 
     @Override
-    public AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
-
-        if (!isGoogleIapEnabled()) {
-            throw new IllegalStateException("IAP properties configured wrong");
-        }
+    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
         throw new IllegalStateException("IAP token cannot be generated. This is responsibility of GCP");
     }
 
     @Override
-    protected Claims validateAndResolveClaimsInternal(AccessToken token) {
+    protected Claims validateAndResolveClaimsInternal(String token) {
         if (!isGoogleIapEnabled()) {
             throw new AuthenticationException("IAP properties configured wrong");
         }
         String audience = String.format(AUDIENCE_FORMAT, Long.toUnsignedString(cloudProjectId), Long.toUnsignedString(backendServiceId));
-        JWTClaimsSet jwtClaimsSet = googleIapJwtVerifier.verifyJwt(token.getValue(), audience);
+        JWTClaimsSet jwtClaimsSet = googleIapJwtVerifier.verifyJwt(token, audience);
 
         return convertToClaims(audience, jwtClaimsSet);
 
-    }
-
-    @Override
-    public boolean isTokenRefreshable(AccessToken token) {
-        return false;
     }
 
     // To validate IAP token we use different jwt library, so we need to convert from JwtClaimsSet to Claims
@@ -83,7 +73,6 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
     }
 
     private boolean isGoogleIapEnabled() {
-        AccessToken.Type type = AccessTokenResolver.getTypeByAuthMethod(this.authMethod);
-        return type == AccessToken.Type.IAP;
+        return authenticationMode == AuthenticationMode.PROXY;
     }
 }

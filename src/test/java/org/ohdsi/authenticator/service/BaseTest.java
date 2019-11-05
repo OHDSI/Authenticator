@@ -1,7 +1,6 @@
 package org.ohdsi.authenticator.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
 import java.util.Date;
 
@@ -11,11 +10,11 @@ public class BaseTest {
     protected Authenticator authenticator;
 
     @Autowired
-    protected JwtTokenProvider jwtTokenProvider;
+    protected TokenProvider tokenProvider;
 
-    protected long getExpirationInSecs(AccessToken accessToken) {
+    protected long getExpirationInSecs(String accessToken) {
 
-        long expirationDateTimeFromToken = jwtTokenProvider.validateTokenAndGetClaims(accessToken).getExpiration().getTime();
+        long expirationDateTimeFromToken = tokenProvider.validateTokenAndGetClaims(accessToken).getExpiration().getTime();
         return (expirationDateTimeFromToken - new Date().getTime()) / 1000;
     }
 }

@@ -4,7 +4,7 @@ import com.github.scribejava.apis.GitHubApi;
 import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.AuthServiceBase;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
 import org.pac4j.oauth.client.OAuth20Client;
@@ -16,7 +16,7 @@ import org.pac4j.oauth.profile.github.GitHubProfileDefinition;
 import java.util.Map;
 import java.util.Objects;
 
-public class GithubAuthService extends AuthService<GithubAuthServiceConfig> {
+public class GithubAuthService extends AuthServiceBase<GithubAuthServiceConfig> {
 
     private OAuth20Configuration oAuthConfig;
     private OAuth20Client oAuthClient;

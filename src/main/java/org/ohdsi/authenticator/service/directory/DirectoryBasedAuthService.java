@@ -2,7 +2,7 @@ package org.ohdsi.authenticator.service.directory;
 
 import lombok.var;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.AuthServiceBase;
 import org.ohdsi.authenticator.service.directory.ldap.LdapAuthServiceConfig;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
-public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig> extends AuthService<T> {
+public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig> extends AuthServiceBase<T> {
 
     private static final String PASSWORD_ATTR = "password";
     protected LdapTemplate ldapTemplate;

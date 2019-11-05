@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.service.support.GoogleIapUtils;
+import org.ohdsi.authenticator.service.support.GoogleIapTestUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,13 +24,14 @@ public class TokenServiceImplTest {
     @Before
     public void setUp() throws Exception {
         tokenService = Mockito.spy(new TokenServiceImpl(googleIapTokenProvider));
-        when(googleIapTokenProvider.validateTokenAndGetClaims(any())).thenReturn(GoogleIapUtils.createClaims());
+        String audience = "testAudience";
+        when(googleIapTokenProvider.validateTokenAndGetClaims(any())).thenReturn(GoogleIapTestUtils.createClaims(audience));
     }
 
     @Test
     public void name() {
         String tokenString = "somevalue";
-        UserInfo userInfo = tokenService.resolveUser(AccessToken.iap(tokenString));
+        UserInfo userInfo = tokenService.resolveUser(tokenString);
         assertEquals("loginFromSubject@gmail.com", userInfo.getUsername());
         assertEquals("loginFromSubject@gmail.com", userInfo.getUsername());
         assertEquals(tokenString, userInfo.getToken());

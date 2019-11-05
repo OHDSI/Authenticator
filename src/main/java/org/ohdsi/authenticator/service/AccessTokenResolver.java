@@ -1,45 +1,23 @@
 package org.ohdsi.authenticator.service;
 
-import java.util.Optional;
-import java.util.function.Function;
-import org.apache.commons.lang3.StringUtils;
-
 public class AccessTokenResolver {
 
     private static final String GOOGLE_IAP_JWT_HEADER = "x-goog-iap-jwt-assertion";
-    private static final String GOOGLE_IAP_AUTH_METHOD = "iap";
 
     private String jwtTokenHeader;
-    private String googleIapJwtHeader = GOOGLE_IAP_JWT_HEADER;
+    private AuthenticationMode authenticationMode;
 
-    public AccessTokenResolver(String jwtTokenHeader) {
+    public AccessTokenResolver(String jwtTokenHeader, AuthenticationMode authenticationMode) {
 
         this.jwtTokenHeader = jwtTokenHeader;
+        this.authenticationMode = authenticationMode;
     }
 
-    public Optional<AccessToken> getAccessToken(String method, Function<String, String> retrieveTokenFunction) {
+    public String getTokenHeader() {
 
-        AccessToken.Type type = getTypeByAuthMethod(method);
-        if (type == AccessToken.Type.IAP) {
-            String googleIapToken = retrieveTokenFunction.apply(googleIapJwtHeader);
-            if (StringUtils.isNotEmpty(googleIapToken)) {
-                return Optional.of(AccessToken.iap(googleIapToken));
-            }
-            return Optional.empty();
+        if (authenticationMode == AuthenticationMode.PROXY) {
+            return GOOGLE_IAP_JWT_HEADER;
         }
-
-        String jwtToken = retrieveTokenFunction.apply(this.jwtTokenHeader);
-        if (StringUtils.isNotEmpty(jwtToken)) {
-            return Optional.of(AccessToken.jwt(jwtToken));
-        }
-        return Optional.empty();
-    }
-
-    public static AccessToken.Type getTypeByAuthMethod(String method) {
-
-        if (StringUtils.equalsIgnoreCase(GOOGLE_IAP_AUTH_METHOD, method)) {
-            return AccessToken.Type.IAP;
-        }
-        return AccessToken.Type.JWT;
+        return jwtTokenHeader;
     }
 }

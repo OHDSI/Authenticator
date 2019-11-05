@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Getter;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -15,18 +16,22 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-@Component
 public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
 
-    @Value("${security.jwt.token.secretKey}")
     private String secretKey;
 
-    @Value("${security.jwt.token.validityInSeconds}")
     @Getter
     private long validityInSeconds;
 
+
+    public JwtTokenProvider(String secretKey, long validityInSeconds) {
+
+        this.secretKey = secretKey;
+        this.validityInSeconds = validityInSeconds;
+    }
+
     @Override
-    public AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
 
         Claims claims = Jwts.claims();
         claims
@@ -36,23 +41,17 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
         Date now = new Date();
         expirationDate = Optional.ofNullable(expirationDate).orElseGet(this::getDefaultExpDate);
 
-        String tokenValue = Jwts.builder()
+        return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
                 .signWith(getKey())
                 .compact();
-        return AccessToken.jwt(tokenValue);
     }
 
-    @Override
-    public boolean isTokenRefreshable(AccessToken token) {
-        return true;
-    }
-
-    public Claims validateAndResolveClaimsInternal(AccessToken token) {
+    public Claims validateAndResolveClaimsInternal(String token) {
         try {
-            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token.getValue());
+            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
             return claimsJws.getBody();
         } catch (Exception ex) {
             throw new AuthenticationException(INVALID_TOKEN_ERROR);

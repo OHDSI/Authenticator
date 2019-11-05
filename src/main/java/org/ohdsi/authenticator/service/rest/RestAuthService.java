@@ -15,7 +15,7 @@ import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.AuthServiceBase;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
@@ -31,7 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-public class RestAuthService extends AuthService<RestAuthServiceConfig> {
+public class RestAuthService extends AuthServiceBase<RestAuthServiceConfig> {
 
     private static final String TOKEN_KEY = "token";
 

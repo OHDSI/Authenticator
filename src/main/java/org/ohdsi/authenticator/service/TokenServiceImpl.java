@@ -19,7 +19,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public UserInfo resolveUser(AccessToken token) {
+    public UserInfo resolveUser(String token) {
 
         Claims claims = tokenProvider.validateTokenAndGetClaims(token);
         Map<String, Object> additionalInfo = claims.entrySet().stream()
@@ -28,14 +28,14 @@ public class TokenServiceImpl implements TokenService {
 
         return UserInfo.builder()
                 .username(claims.getSubject())
-                .authMethod(claims.get(AuthenticatorImpl.METHOD_KEY, String.class))
-                .token(token.getValue())
+                .authMethod(claims.get(AuthenticatorStandardMode.METHOD_KEY, String.class))
+                .token(token)
                 .additionalInfo(additionalInfo)
                 .build();
     }
 
     @Override
-    public <T> T resolveAdditionalInfo(AccessToken token, String key, Class<T> valueClass) {
+    public <T> T resolveAdditionalInfo(String token, String key, Class<T> valueClass) {
 
         Claims claims = tokenProvider.validateTokenAndGetClaims(token);
         return claims.get(key, valueClass);

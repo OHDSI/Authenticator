@@ -11,15 +11,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
-public class GoogleIapUtils {
+public class GoogleIapTestUtils {
 
-    public static String createJwtToken() {
+    public static String createGoogleIapToken(String audience) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN");
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
 
-        Claims claims = createClaims();
+        Claims claims = createClaims(audience);
 
         return Jwts.builder()
                 .setHeaderParam("kid", "mpf0DA")
@@ -28,11 +28,11 @@ public class GoogleIapUtils {
                 .compact();
     }
 
-    public static Claims createClaims() {
+    public static Claims createClaims(String audience) {
         Claims claims = Jwts.claims();
         claims.setSubject("loginFromSubject@gmail.com");
         claims.setExpiration(toDate(LocalDate.now().plusYears(1)));
-        claims.setAudience("testAudience");
+        claims.setAudience(audience);
         claims.setIssuedAt(toDate(LocalDate.now().minusYears(1)));
         claims.setIssuer("https://cloud.google.com/iap");
         claims.put("email", "login@gmail.com");

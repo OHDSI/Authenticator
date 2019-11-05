@@ -7,12 +7,11 @@ import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Objects;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -29,6 +28,9 @@ public class RestAuthenticationTest extends BaseTest {
     @Value("${credentials.rest-atlas.password}")
     private String atlasPassword;
 
+    @Autowired
+    protected JwtTokenProvider jwtTokenProvider;
+
     @Test
     public void testRestArachneAuthSuccess() {
 
@@ -36,7 +38,7 @@ public class RestAuthenticationTest extends BaseTest {
         var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
-        AccessToken accessToken = AccessToken.jwt(userInfo.getToken());
+        String accessToken = userInfo.getToken();
         Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
         Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
 
@@ -48,7 +50,7 @@ public class RestAuthenticationTest extends BaseTest {
         final String method = "rest-atlas";
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
-        AccessToken accessToken = AccessToken.jwt(userInfo.getToken());
+        String accessToken = userInfo.getToken();
         Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
         Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
     }

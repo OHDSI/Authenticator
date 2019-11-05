@@ -7,11 +7,10 @@ import java.util.Map;
 
 public interface TokenProvider {
 
-    void invalidateToken(AccessToken token);
+    void invalidateToken(String token);
 
-    Claims validateTokenAndGetClaims(AccessToken token);
+    Claims validateTokenAndGetClaims(String token);
 
-    AccessToken createToken(AccessToken.Type type, String username, Map<String, String> userAdditionalInfo, Date expirationDate);
+    String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate);
 
-    boolean isTokenRefreshable(AccessToken token);
 }

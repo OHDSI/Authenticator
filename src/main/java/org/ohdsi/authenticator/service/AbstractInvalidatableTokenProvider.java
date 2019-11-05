@@ -14,22 +14,22 @@ public abstract class AbstractInvalidatableTokenProvider implements TokenProvide
     protected Set<String> invalidatedTokens = new CopyOnWriteArraySet<>();
 
     @Override
-    public void invalidateToken(AccessToken token) {
-        invalidatedTokens.add(token.getValue());
+    public void invalidateToken(String token) {
+        invalidatedTokens.add(token);
     }
 
     @Override
-    public Claims validateTokenAndGetClaims(AccessToken token) {
+    public Claims validateTokenAndGetClaims(String token) {
 
-        if (token == null || StringUtils.isEmpty(token.getValue())){
+        if (token == null || StringUtils.isEmpty(token)){
             throw new AuthenticationException(EMPTY_TOKEN_ERROR);
         }
-        if (invalidatedTokens.contains(token.getValue())) {
+        if (invalidatedTokens.contains(token)) {
             throw new AuthenticationException(INVALID_TOKEN_ERROR);
         }
         return validateAndResolveClaimsInternal(token);
     }
 
-    protected abstract Claims validateAndResolveClaimsInternal(AccessToken token);
+    protected abstract Claims validateAndResolveClaimsInternal(String token);
 
 }

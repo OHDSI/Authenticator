@@ -1,7 +1,6 @@
 package org.ohdsi.authenticator.service;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
@@ -11,11 +10,12 @@ import org.ohdsi.authenticator.exception.AuthenticationException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.ohdsi.authenticator.service.support.GoogleIapUtils.createJwtToken;
+import static org.ohdsi.authenticator.service.support.GoogleIapTestUtils.createGoogleIapToken;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleIapJwtVerifierTest {
 
+    public static final String TEST_AUDIENCE = "testAudience";
     @Spy
     private GoogleIapJwtVerifier googleIapJwtVerifier;
 
@@ -24,10 +24,9 @@ public class GoogleIapJwtVerifierTest {
         doReturn(true)
                 .when(this.googleIapJwtVerifier)
                 .isSignatureValid(any(), any());
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
-        String jwtToken = createJwtToken();
-        JWTClaimsSet claims = this.googleIapJwtVerifier.verifyJwt(jwtToken, "testAudience");
+        String accessToken = createGoogleIapToken(TEST_AUDIENCE);
+        JWTClaimsSet claims = this.googleIapJwtVerifier.verifyJwt(accessToken, TEST_AUDIENCE);
         String login = claims.getClaim(GoogleIapJwtVerifier.USER_EMAIL_FIELD).toString();
         assertEquals("login@gmail.com", login);
     }
@@ -38,8 +37,8 @@ public class GoogleIapJwtVerifierTest {
                 .when(this.googleIapJwtVerifier)
                 .isSignatureValid(any(), any());
 
-        String jwtToken = createJwtToken();
-        this.googleIapJwtVerifier.verifyJwt(jwtToken, "testAudience");
+        String jwtToken = createGoogleIapToken(TEST_AUDIENCE);
+        this.googleIapJwtVerifier.verifyJwt(jwtToken, TEST_AUDIENCE);
     }
 
 }

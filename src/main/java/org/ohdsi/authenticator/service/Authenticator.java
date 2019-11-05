@@ -6,9 +6,9 @@ import org.pac4j.core.credentials.Credentials;
 public interface Authenticator {
 
     UserInfo authenticate(String method, Credentials credentials);
-    String resolveUsername(AccessToken token);
+    String resolveUsername(String token);
 
-    UserInfo refreshToken(AccessToken token);
-    void invalidateToken(AccessToken token);
+    UserInfo refreshToken(String token);
+    void invalidateToken(String token);
 
 }

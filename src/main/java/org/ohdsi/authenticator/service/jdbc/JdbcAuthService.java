@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.AuthServiceBase;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,12 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ClassUtils;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JdbcAuthService extends AuthService<JdbcAuthServiceConfig> {
+public class JdbcAuthService extends AuthServiceBase<JdbcAuthServiceConfig> {
 
     private static final String USERNAME_PARAM = "username";
     private static final String PASSWORD_PARAM = "password";
