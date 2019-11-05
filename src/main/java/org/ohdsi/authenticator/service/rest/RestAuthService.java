@@ -227,6 +227,7 @@ public class RestAuthService extends AuthServiceBase<RestAuthServiceConfig> {
     }
 
     protected RestTemplate getRestTemplate() {
+
         return new RestTemplate();
     }
 }

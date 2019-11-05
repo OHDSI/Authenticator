@@ -18,6 +18,7 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
     public GoogleIapTokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
                                   Long cloudProjectId,
                                   Long backendServiceId) {
+
         this.googleIapJwtVerifier = googleIapJwtVerifier;
         this.cloudProjectId = cloudProjectId;
         this.backendServiceId = backendServiceId;
@@ -25,6 +26,7 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     @PostConstruct
     private void init() {
+
         if (cloudProjectId == null) {
             throw new IllegalStateException("IAP properties configured wrong: cloudProjectId is empty");
         }
@@ -35,11 +37,15 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     @Override
     public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+
         throw new IllegalStateException("IAP token cannot be generated. This is responsibility of GCP");
     }
 
     @Override
-    protected Claims validateAndResolveClaimsInternal(String token) {
+    public Claims validateTokenAndGetClaims(String token) {
+
+        checkThatTokenWasNotInvalidated(token);
+
         String audience = String.format(AUDIENCE_FORMAT, Long.toUnsignedString(cloudProjectId), Long.toUnsignedString(backendServiceId));
         JWTClaimsSet jwtClaimsSet = googleIapJwtVerifier.verifyJwt(token, audience);
 
@@ -51,6 +57,7 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
     // The reason why I decided to keep two JWT library in the project is that all examples of official documentation are written using nimbusds library,
     // and this library has a good support for retrieving public signature keys from remote repositories. On the other hand we use jsonwebtoken all over other application.
     private Claims convertToClaims(String audience, JWTClaimsSet jwtClaimsSet) {
+
         Claims claims = Jwts.claims();
         claims.putAll(jwtClaimsSet.getClaims());
         claims.setAudience(audience);

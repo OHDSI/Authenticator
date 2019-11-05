@@ -18,8 +18,7 @@ public abstract class AbstractInvalidatableTokenProvider implements TokenProvide
         invalidatedTokens.add(token);
     }
 
-    @Override
-    public Claims validateTokenAndGetClaims(String token) {
+    protected void checkThatTokenWasNotInvalidated(String token) {
 
         if (token == null || StringUtils.isEmpty(token)){
             throw new AuthenticationException(EMPTY_TOKEN_ERROR);
@@ -27,9 +26,6 @@ public abstract class AbstractInvalidatableTokenProvider implements TokenProvide
         if (invalidatedTokens.contains(token)) {
             throw new AuthenticationException(INVALID_TOKEN_ERROR);
         }
-        return validateAndResolveClaimsInternal(token);
     }
-
-    protected abstract Claims validateAndResolveClaimsInternal(String token);
 
 }

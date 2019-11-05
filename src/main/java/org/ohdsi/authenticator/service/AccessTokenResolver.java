@@ -13,7 +13,7 @@ public class AccessTokenResolver {
         this.authenticationMode = authenticationMode;
     }
 
-    public String getTokenHeader() {
+    public String getTokenHeaderName() {
 
         if (authenticationMode == AuthenticationMode.PROXY) {
             return GOOGLE_IAP_JWT_HEADER;

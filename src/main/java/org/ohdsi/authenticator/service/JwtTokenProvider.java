@@ -4,17 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Getter;
-import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import javax.crypto.spec.SecretKeySpec;
+import lombok.Getter;
+import org.ohdsi.authenticator.exception.AuthenticationException;
 
 public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
 
@@ -49,7 +45,11 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
                 .compact();
     }
 
-    public Claims validateAndResolveClaimsInternal(String token) {
+    @Override
+    public Claims validateTokenAndGetClaims(String token) {
+
+        checkThatTokenWasNotInvalidated(token);
+
         try {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
             return claimsJws.getBody();
@@ -59,6 +59,7 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
     }
 
     private Key getKey() {
+
         return new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 

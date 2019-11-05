@@ -50,6 +50,7 @@ public class AuthenticatorStandardMode implements Authenticator {
 
     @Override
     public UserInfo authenticate(String method, Credentials request) {
+
         AuthService authService = getForMethod(method);
 
         if (authService == null) {
@@ -67,6 +68,7 @@ public class AuthenticatorStandardMode implements Authenticator {
 
     @Override
     public String resolveUsername(String token) {
+
         return tokenService.resolveAdditionalInfo(token, Claims.SUBJECT, String.class);
     }
 
