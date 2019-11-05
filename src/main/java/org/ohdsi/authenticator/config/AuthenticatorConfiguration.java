@@ -44,11 +44,10 @@ public class AuthenticatorConfiguration {
 
         @Bean
         public TokenProvider tokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
-                                           @Value("${security.authentication.mode}") AuthenticationMode authenticationMode,
                                            @Value("${security.googleIap.cloudProjectId}") Long cloudProjectId,
                                            @Value("${security.googleIap.backendServiceId}") Long backendServiceId) {
 
-            return new GoogleIapTokenProvider(googleIapJwtVerifier, authenticationMode, cloudProjectId, backendServiceId);
+            return new GoogleIapTokenProvider(googleIapJwtVerifier, cloudProjectId, backendServiceId);
         }
 
         @Bean

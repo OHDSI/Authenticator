@@ -6,33 +6,25 @@ import io.jsonwebtoken.Jwts;
 import java.util.Date;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.springframework.beans.factory.annotation.Value;
 
 public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     public static final String AUDIENCE_FORMAT = "/projects/%s/global/backendServices/%s";
 
-    private AuthenticationMode authenticationMode;
     private GoogleIapJwtVerifier googleIapJwtVerifier;
     private Long cloudProjectId;
     private Long backendServiceId;
 
     public GoogleIapTokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
-                                  @Value("${security.authentication.mode:" + AuthenticationMode.Const.STANDARD + "}") AuthenticationMode authenticationMode,
-                                  @Value("${security.googleIap.cloudProjectId:}") Long cloudProjectId,
-                                  @Value("${security.googleIap.backendServiceId:}") Long backendServiceId) {
+                                  Long cloudProjectId,
+                                  Long backendServiceId) {
         this.googleIapJwtVerifier = googleIapJwtVerifier;
-        this.authenticationMode = authenticationMode;
         this.cloudProjectId = cloudProjectId;
         this.backendServiceId = backendServiceId;
     }
 
     @PostConstruct
     private void init() {
-        if (!isGoogleIapEnabled()) {
-            return;
-        }
         if (cloudProjectId == null) {
             throw new IllegalStateException("IAP properties configured wrong: cloudProjectId is empty");
         }
@@ -48,9 +40,6 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     @Override
     protected Claims validateAndResolveClaimsInternal(String token) {
-        if (!isGoogleIapEnabled()) {
-            throw new AuthenticationException("IAP properties configured wrong");
-        }
         String audience = String.format(AUDIENCE_FORMAT, Long.toUnsignedString(cloudProjectId), Long.toUnsignedString(backendServiceId));
         JWTClaimsSet jwtClaimsSet = googleIapJwtVerifier.verifyJwt(token, audience);
 
@@ -72,7 +61,4 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
         return claims;
     }
 
-    private boolean isGoogleIapEnabled() {
-        return authenticationMode == AuthenticationMode.PROXY;
-    }
 }
