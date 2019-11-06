@@ -1,7 +1,5 @@
 package org.ohdsi.authenticator.service.authentication;
 
-import org.ohdsi.authenticator.service.authentication.AuthenticationMode;
-
 public class AccessTokenResolver {
 
     public static final String GOOGLE_IAP_JWT_HEADER = "x-goog-iap-jwt-assertion";
