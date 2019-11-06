@@ -4,6 +4,10 @@
 
 Authenticator is a shared component which encapsulates authentication services required by OHDSI tools. Its goal is to reduce amount of effort required to implement and support authentication in multiple applications, provide single source of truth. 
 
+Currently supported modes:
+- Standard
+- Proxy
+
 Currently supported methods:
 - Database (JDBC)
 - REST
@@ -11,7 +15,34 @@ Currently supported methods:
 - LDAP
 - Active Directory
 
-## Configuration
+
+
+## PROXY authentication modes 
+The proxy mode means that your application is deployed on an environment behind a proxy. 
+This proxy takes full responsibility of the authentication, and transfer to us only a access token in a request header.
+This mode is currently implemented for IAP(Identity-Aware Proxy) https://cloud.google.com/iap/
+ 
+### Configuration
+
+- `security.authentication.mode` specifies authentication mode. `PROXY` values activates proxy mode 
+- `security.googleIap.cloudProjectId` specifies project id of the Google cloud platform https://cloud.google.com/resource-manager/docs/creating-managing-projects
+- `security.googleIap.backendServiceId` specifies backend service id for Google cloud platform https://cloud.google.com/load-balancing/docs/backend-service 
+ 
+Sample:
+```
+security:
+  authentication:
+    mode: PROXY
+  googleIap:
+    cloudProjectId: 42
+    backendServiceId: 42
+```
+
+## STANDARD authentication modes
+The standard authentication mode means that your application is take care of the authentication process by itself. 
+ 
+### Configuration
+The `STANDARD` authentication mode is the default mode, so it is not necessary to explicitly configure it. 
 
 Common configuration parameters:
 
@@ -19,7 +50,7 @@ Common configuration parameters:
   - keys represent names of user's properties, which will be stored in JWT body / UserInfo.additionalInfo
   - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin 
 
-### Database (JDBC) authentication
+#### Database (JDBC) authentication
 
 - SQL query must return a single row
 - SQL query must return user's password hash in a `password` field
@@ -43,7 +74,7 @@ authenticator:
           lastName: LAST_NAME
 ```
 
-### REST authentication
+#### REST authentication
 
 - `bodyFormat` specifies content type of request submitted to authentication endpoint
 - `params` specify content of the request where `username` and `password` are substituted with provided credentials
@@ -87,7 +118,7 @@ authenticator:
           key: $.result
 ```
 
-### Github
+#### Github
 
 - `apiKey` and `apiSecret` should be copied from [Github's OAuth Apps page](https://github.com/settings/developers)
 - `usernameProperty` defines a property which value will be used as a username of authenticated user
@@ -108,7 +139,7 @@ authenticator:
           firstName: name.split(' ')[0]
           lastName: name.split(' ')[1]
 ```
-### LDAP authentication
+#### LDAP authentication
 
 Authentication across directory requires special system account that is used to conduct search.
 `searchFilter` is a formatted LDAP query used to authenticate user. Query should include at least a parameter for
@@ -146,7 +177,7 @@ Authentication across directory requires special system account that is used to 
           lastName: sn
 ``` 
 
-### Active Directory authentication
+#### Active Directory authentication
 
 Active Directory mostly is similar to LDAP authentication, except:
 - `baseDn` allows to provide username instead of distinguished name 

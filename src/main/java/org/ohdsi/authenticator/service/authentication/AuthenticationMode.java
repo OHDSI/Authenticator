@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.provider.JwtTokenProvider;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +7,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.TokenService;
+import org.ohdsi.authenticator.service.authentication.authenticator.TokenServiceImpl;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
 import org.ohdsi.authenticator.service.support.GoogleIapTestUtils;
 
 import static org.junit.Assert.*;
@@ -25,7 +28,7 @@ public class TokenServiceImplTest {
     public void setUp() throws Exception {
         tokenService = Mockito.spy(new TokenServiceImpl(googleIapTokenProvider));
         String audience = "testAudience";
-        when(googleIapTokenProvider.validateTokenAndGetClaims(any())).thenReturn(GoogleIapTestUtils.createClaims(audience));
+        when(googleIapTokenProvider.validateTokenAndGetClaims(any())).thenReturn(GoogleIapTestUtils.createClaims(audience, "loginFromSubject@gmail.com"));
     }
 
     @Test

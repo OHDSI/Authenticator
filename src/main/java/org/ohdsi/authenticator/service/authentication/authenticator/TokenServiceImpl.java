@@ -1,8 +1,10 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.Authenticator;
 import org.ohdsi.authenticator.service.github.RedirectRequiredException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -21,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;

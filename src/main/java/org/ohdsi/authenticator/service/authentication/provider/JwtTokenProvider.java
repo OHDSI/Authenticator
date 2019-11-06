@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

@@ -1,11 +1,11 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.provider;
 
-import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
 
 public abstract class AbstractInvalidatableTokenProvider implements TokenProvider {
 

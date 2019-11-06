@@ -1,5 +1,8 @@
 package org.ohdsi.authenticator.service;
 
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenService;
+import org.ohdsi.authenticator.service.authentication.authenticator.TokenServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,14 +1,15 @@
 package org.ohdsi.authenticator.config;
 
-import org.ohdsi.authenticator.service.AuthenticationMode;
-import org.ohdsi.authenticator.service.Authenticator;
-import org.ohdsi.authenticator.service.AuthenticatorProxyMode;
-import org.ohdsi.authenticator.service.AuthenticatorStandardMode;
-import org.ohdsi.authenticator.service.GoogleIapJwtVerifier;
-import org.ohdsi.authenticator.service.GoogleIapTokenProvider;
-import org.ohdsi.authenticator.service.JwtTokenProvider;
-import org.ohdsi.authenticator.service.TokenProvider;
-import org.ohdsi.authenticator.service.TokenService;
+import org.ohdsi.authenticator.service.authentication.AuthenticationMode;
+import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorProxyMode;
+import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorStandardMode;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenSignatureVerifier;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenVerifier;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
+import org.ohdsi.authenticator.service.authentication.provider.JwtTokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -45,17 +46,23 @@ public class AuthenticatorConfiguration {
         }
 
         @Bean
-        public TokenProvider tokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
+        public TokenProvider tokenProvider(GoogleIapTokenVerifier googleIapTokenVerifier,
                                            @Value("${security.googleIap.cloudProjectId}") Long cloudProjectId,
                                            @Value("${security.googleIap.backendServiceId}") Long backendServiceId) {
 
-            return new GoogleIapTokenProvider(googleIapJwtVerifier, cloudProjectId, backendServiceId);
+            return new GoogleIapTokenProvider(googleIapTokenVerifier, cloudProjectId, backendServiceId);
         }
 
         @Bean
-        public GoogleIapJwtVerifier googleIapJwtVerifier() {
+        public GoogleIapTokenVerifier googleIapJwtVerifier(GoogleIapTokenSignatureVerifier googleIapTokenSignatureVerifier) {
 
-            return new GoogleIapJwtVerifier();
+            return new GoogleIapTokenVerifier(googleIapTokenSignatureVerifier);
+        }
+
+        @Bean
+        public GoogleIapTokenSignatureVerifier googleIapTokenSignatureVerifier() {
+
+            return new GoogleIapTokenSignatureVerifier();
         }
     }
 

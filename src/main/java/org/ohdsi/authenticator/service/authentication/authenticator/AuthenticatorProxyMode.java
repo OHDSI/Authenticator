@@ -1,8 +1,11 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import io.jsonwebtoken.Claims;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenService;
 import org.pac4j.core.credentials.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

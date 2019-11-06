@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,12 @@ import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.AuthMethodSettings;
+import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.AuthServiceConfig;
+import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.TokenService;
 import org.pac4j.core.credentials.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

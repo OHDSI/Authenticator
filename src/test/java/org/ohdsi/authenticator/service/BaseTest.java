@@ -2,6 +2,8 @@ package org.ohdsi.authenticator.service;
 
 import java.util.Date;
 import org.ohdsi.authenticator.config.AuthenticatorConfiguration;
+import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

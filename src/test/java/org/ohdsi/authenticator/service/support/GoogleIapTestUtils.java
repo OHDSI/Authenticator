@@ -14,13 +14,13 @@ import java.util.Date;
 
 public class GoogleIapTestUtils {
 
-    public static String createGoogleIapToken(String audience) {
+    public static String createGoogleIapToken(String audience, String email) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN_SECRET_KEY_FOR_SIGN");
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
 
-        Claims claims = createClaims(audience);
+        Claims claims = createClaims(audience, email);
 
         return Jwts.builder()
                 .setHeaderParam("kid", "mpf0DA")
@@ -29,14 +29,14 @@ public class GoogleIapTestUtils {
                 .compact();
     }
 
-    public static Claims createClaims(String audience) {
+    public static Claims createClaims(String audience, String email) {
         Claims claims = Jwts.claims();
         claims.setSubject("loginFromSubject@gmail.com");
         claims.setExpiration(toDate(LocalDateTime.now().plusYears(1)));
         claims.setAudience(audience);
         claims.setIssuedAt(toDate(LocalDateTime.now().minusYears(1)));
         claims.setIssuer("https://cloud.google.com/iap");
-        claims.put("email", "login@gmail.com");
+        claims.put("email", email);
         return claims;
     }
 

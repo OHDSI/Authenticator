@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication.provider;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.jsonwebtoken.Claims;
@@ -11,15 +11,15 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
 
     public static final String AUDIENCE_FORMAT = "/projects/%s/global/backendServices/%s";
 
-    private GoogleIapJwtVerifier googleIapJwtVerifier;
+    private GoogleIapTokenVerifier googleIapTokenVerifier;
     private Long cloudProjectId;
     private Long backendServiceId;
 
-    public GoogleIapTokenProvider(GoogleIapJwtVerifier googleIapJwtVerifier,
+    public GoogleIapTokenProvider(GoogleIapTokenVerifier googleIapTokenVerifier,
                                   Long cloudProjectId,
                                   Long backendServiceId) {
 
-        this.googleIapJwtVerifier = googleIapJwtVerifier;
+        this.googleIapTokenVerifier = googleIapTokenVerifier;
         this.cloudProjectId = cloudProjectId;
         this.backendServiceId = backendServiceId;
     }
@@ -47,7 +47,7 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
         checkThatTokenWasNotInvalidated(token);
 
         String audience = String.format(AUDIENCE_FORMAT, Long.toUnsignedString(cloudProjectId), Long.toUnsignedString(backendServiceId));
-        JWTClaimsSet jwtClaimsSet = googleIapJwtVerifier.verifyJwt(token, audience);
+        JWTClaimsSet jwtClaimsSet = googleIapTokenVerifier.verifyTokenAndGetClaim(token, audience);
 
         return convertToClaims(audience, jwtClaimsSet);
 
@@ -61,7 +61,7 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
         Claims claims = Jwts.claims();
         claims.putAll(jwtClaimsSet.getClaims());
         claims.setAudience(audience);
-        Object userEmail = jwtClaimsSet.getClaim(GoogleIapJwtVerifier.USER_EMAIL_FIELD);
+        Object userEmail = jwtClaimsSet.getClaim(GoogleIapTokenVerifier.USER_EMAIL_FIELD);
         if (userEmail != null) {
             claims.setSubject(userEmail.toString());
         }
