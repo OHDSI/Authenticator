@@ -53,6 +53,8 @@ public class GithubAuthenticationTest extends FluentTest {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--incognito");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         return new ChromeDriver(options);
     }
 
