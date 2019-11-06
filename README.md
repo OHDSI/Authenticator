@@ -17,7 +17,7 @@ Currently supported methods:
 
 
 
-## PROXY authentication modes 
+## PROXY authentication mode 
 The proxy mode means that your application is deployed on an environment behind a proxy. 
 This proxy takes full responsibility for the authentication, and transfer to us only an access token in a request header.
 This mode is currently implemented for IAP(Identity-Aware Proxy) https://cloud.google.com/iap/
@@ -38,7 +38,7 @@ security:
     backendServiceId: 42
 ```
 
-## STANDARD authentication modes
+## STANDARD authentication mode
 The standard authentication mode means that your application  takes care of the authentication process by itself. 
  
 ### Configuration
