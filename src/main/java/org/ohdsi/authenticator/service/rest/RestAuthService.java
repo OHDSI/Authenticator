@@ -4,12 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
@@ -25,15 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-public class RestAuthService extends AuthService<RestAuthServiceConfig> {
+public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private static final String TOKEN_KEY = "token";
 
@@ -47,7 +45,7 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
 
         UsernamePasswordCredentials creds = (UsernamePasswordCredentials) request;
 
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = getRestTemplate();
 
         HttpHeaders headers = getAuthHeaders();
         Map<String, String> body = getAuthBody(creds);
@@ -55,15 +53,15 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
         HttpEntity httpEntity = new HttpEntity(formatBody(body, headers.getContentType()), headers);
         ResponseEntity<String> responseEntity = restTemplate.exchange(config.getUrl(), HttpMethod.POST, httpEntity, String.class);
 
-        var isAuthenticated = isSuccessfulLogin(responseEntity);
-        var authBuilder = new AuthenticationBuilder()
+        boolean isAuthenticated = isSuccessfulLogin(responseEntity);
+        AuthenticationBuilder authBuilder = new AuthenticationBuilder()
                 .setAuthenticated(isAuthenticated)
                 .setUsername(creds.getUsername());
 
         if (isAuthenticated) {
             String remoteToken = extractRemoteToken(responseEntity, config.getToken());
 
-            var details = Stream.of(remoteToken)
+            Map<String, String> details = Stream.of(remoteToken)
                     .map(this::queryUserInfo)
                     .map(this::extractUserDetails)
                     .findFirst().orElseThrow(() -> new AuthenticationException(INFO_EXTRACTION_ERROR));
@@ -77,26 +75,26 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
     }
 
     @Override
-    public AuthenticationToken refreshToken(Jws<Claims> claims) {
+    public AuthenticationToken refreshToken(Claims claims) {
 
         if (Objects.nonNull(config.getRefresh())) {
-            String remoteToken = claims.getBody().get(TOKEN_KEY).toString();
+            String remoteToken = claims.get(TOKEN_KEY).toString();
             AuthenticationBuilder authBuilder = new AuthenticationBuilder();
 
-            RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = getRestTemplate();
             MultiValueMap<String, String> headers = getHeadersWithToken(remoteToken);
             HttpEntity httpEntity = new HttpEntity(new HashMap<>(), headers);
             ResponseEntity<String> response = restTemplate.exchange(config.getRefresh().getUrl(), HttpMethod.POST, httpEntity, String.class);
 
             String newRemoteToken = extractRemoteToken(response, config.getRefresh());
-            claims.getBody().put(TOKEN_KEY, newRemoteToken);
+            claims.put(TOKEN_KEY, newRemoteToken);
 
             setExpirationDate(authBuilder, newRemoteToken);
 
             return authBuilder
                     .setAuthenticated(true)
-                    .setUsername(claims.getBody().getSubject())
-                    .setUserDetails((Map) claims.getBody())
+                    .setUsername(claims.getSubject())
+                    .setUserDetails((Map) claims)
                     .build();
         } else {
             return super.refreshToken(claims);
@@ -190,7 +188,7 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
 
     private ResponseEntity<String> queryUserInfo(String token) {
 
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = getRestTemplate();
         MultiValueMap<String, String> headers = getHeadersWithToken(token);
         Map<String, String> body = new HashMap<>();
         HttpEntity httpEntity = new HttpEntity(body, headers);
@@ -200,7 +198,7 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
     private Map<String, String> extractUserDetails(ResponseEntity<String> responseEntity) {
 
         try {
-            var responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
+            Map<?,?> responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
             return extractUserDetails(responseBodyJson);
         } catch (Exception ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
@@ -226,5 +224,10 @@ public class RestAuthService extends AuthService<RestAuthServiceConfig> {
             Date expirationDate = extractExpirationDate(remoteToken);
             builder.setExpirationDate(expirationDate);
         }
+    }
+
+    protected RestTemplate getRestTemplate() {
+
+        return new RestTemplate();
     }
 }

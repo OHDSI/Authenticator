@@ -1,10 +1,11 @@
 package org.ohdsi.authenticator.service;
 
-import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.provider.JwtTokenProvider;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +30,8 @@ public class RefreshTokenTest extends BaseTest {
     private String arachneUsername;
     @Value("${credentials.rest-arachne.password}")
     private String arachnePassword;
+    @Autowired
+    protected JwtTokenProvider jwtTokenProvider;
 
     @Test
     public void testDefaultTokenRefresh() {
@@ -36,10 +39,11 @@ public class RefreshTokenTest extends BaseTest {
         String token = createDummyToken("db");
         Assert.isTrue(getExpirationInSecs(token) <= DUMMY_EXP_IN_SEC, "Wrong dummy token");
         String newToken = authenticator.refreshToken(token).getToken();
+
         long newExpInSecs = getExpirationInSecs(newToken);
         Assert.isTrue(
-            newExpInSecs >= DUMMY_EXP_IN_SEC && newExpInSecs <= jwtTokenProvider.getDefaultValidityInSeconds()
-            && Objects.equals(jwtTokenProvider.resolveClaims(newToken).getBody().get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
+            newExpInSecs >= DUMMY_EXP_IN_SEC && newExpInSecs <= jwtTokenProvider.getValidityInSeconds()
+            && Objects.equals(tokenProvider.validateTokenAndGetClaims(newToken).get(DUMMY_PROP_KEY), DUMMY_PROP_VAL),
             "Token hasn't been refreshed"
         );
     }
@@ -47,21 +51,23 @@ public class RefreshTokenTest extends BaseTest {
     @Test
     public void testRestTokenRefresh() throws InterruptedException {
 
-        final var method = "rest-arachne";
-        var authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
+        final String method = "rest-arachne";
+        UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String token = userInfo.getToken();
-        Date originalExpDate = jwtTokenProvider.getExpDate(token);
+
+        Date originalExpDate = tokenProvider.validateTokenAndGetClaims(token).getExpiration();
 
         Thread.sleep(1000L);
 
-        String newToken = authenticator.refreshToken(token).getToken();
-        Date newExpDate = jwtTokenProvider.getExpDate(newToken);
+        String newToken =  authenticator.refreshToken(token).getToken();
+
+        Date newExpDate = tokenProvider.validateTokenAndGetClaims(newToken).getExpiration();
         long newExpInSecs = getExpirationInSecs(newToken);
 
         Assert.isTrue(
-            newExpInSecs > jwtTokenProvider.getDefaultValidityInSeconds()
+            newExpInSecs > jwtTokenProvider.getValidityInSeconds()
             && originalExpDate.before(newExpDate),
             "Token hasn't been refreshed"
         );
@@ -69,13 +75,13 @@ public class RefreshTokenTest extends BaseTest {
 
     private String createDummyToken(String forMethod) {
 
-        return jwtTokenProvider.createToken(
-            "dummy",
-            new HashMap<String, String>() {{
-                put(METHOD_PROP_KEY, forMethod);
-                put(DUMMY_PROP_KEY, DUMMY_PROP_VAL);
-            }},
-            new Date(new Date().getTime() + DUMMY_EXP_IN_SEC * 1000)
+        return tokenProvider.createToken(
+                "dummy",
+                new HashMap<String, String>() {{
+                    put(METHOD_PROP_KEY, forMethod);
+                    put(DUMMY_PROP_KEY, DUMMY_PROP_VAL);
+                }},
+                new Date(new Date().getTime() + DUMMY_EXP_IN_SEC * 1000)
         );
     }
 }

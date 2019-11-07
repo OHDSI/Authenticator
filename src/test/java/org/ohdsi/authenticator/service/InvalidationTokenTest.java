@@ -39,6 +39,6 @@ public class InvalidationTokenTest extends BaseTest {
 
     private String createDummyToken() {
 
-        return jwtTokenProvider.createToken(DUMMY_USERNAME, new HashMap<>(), new Date(new Date().getTime() + 600 * 1000));
+        return tokenProvider.createToken(DUMMY_USERNAME, new HashMap<>(), new Date(new Date().getTime() + 600 * 1000));
     }
 }

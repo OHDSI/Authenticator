@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service;
+package org.ohdsi.authenticator.service.authentication;
 
 import org.ohdsi.authenticator.model.UserInfo;
 import org.pac4j.core.credentials.Credentials;
@@ -10,4 +10,5 @@ public interface Authenticator {
 
     UserInfo refreshToken(String token);
     void invalidateToken(String token);
+
 }

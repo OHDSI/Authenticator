@@ -6,7 +6,7 @@
 
     <groupId>org.ohdsi</groupId>
     <artifactId>authenticator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -21,7 +21,18 @@
         <java.version>1.8</java.version>
         <jjwt.version>0.10.5</jjwt.version>
         <pac4j.version>4.0.0-RC1</pac4j.version>
-        <fluentlenium.version>3.9.0</fluentlenium.version>
+        <fluentlenium.version>${commons-lang3.version}.0</fluentlenium.version>
+        <HikariCP.version>2.7.8</HikariCP.version>
+        <lombok.version>1.18.8</lombok.version>
+        <jackson-databind.version>2.9.9</jackson-databind.version>
+        <json-path.version>2.4.0</json-path.version>
+        <nimbus-jose-jwt.version>8.2</nimbus-jose-jwt.version>
+        <guava.version>28.1-jre</guava.version>
+        <htmlunit-driver.version>2.34.0</htmlunit-driver.version>
+        <junit.version>4.12</junit.version>
+        <selenium-java.version>3.141.59</selenium-java.version>
+        <commons-lang3.version>3.9</commons-lang3.version>
+        <servlet-api.version>2.5</servlet-api.version>
     </properties>
 
     <dependencies>
@@ -52,7 +63,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>2.7.8</version>
+            <version>${HikariCP.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -75,14 +86,33 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.9</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${nimbus-jose-jwt.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -91,7 +121,7 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.4.0</version>
+            <version>${json-path.version}</version>
         </dependency>
         <dependency>
             <groupId>org.pac4j</groupId>
@@ -103,7 +133,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -126,13 +156,13 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>htmlunit-driver</artifactId>
-            <version>2.34.0</version>
+            <version>${htmlunit-driver.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version>
+            <version>${selenium-java.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -168,8 +198,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>
