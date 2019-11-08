@@ -6,7 +6,7 @@
 
     <groupId>org.ohdsi</groupId>
     <artifactId>authenticator</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.2-QA</version>
     <packaging>jar</packaging>
 
     <parent>
