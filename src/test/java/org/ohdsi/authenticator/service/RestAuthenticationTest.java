@@ -1,6 +1,8 @@
 package org.ohdsi.authenticator.service;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
@@ -39,8 +41,8 @@ public class RestAuthenticationTest extends BaseTest {
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String accessToken = userInfo.getToken();
-        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
-        Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
+        assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
+        assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
 
     }
 
@@ -51,8 +53,8 @@ public class RestAuthenticationTest extends BaseTest {
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
         String accessToken = userInfo.getToken();
-        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
-        Assert.assertTrue("Failed to authenticate user with proper credentials", jwtTokenProvider.getValidityInSeconds() >= getExpirationInSecs(accessToken));
+        assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
+        assertTrue("Failed to authenticate user with proper credentials", jwtTokenProvider.getValidityInSeconds() >= getExpirationInSecs(accessToken));
     }
 
     @Test
@@ -67,6 +69,6 @@ public class RestAuthenticationTest extends BaseTest {
             failed = true;
         }
 
-        Assert.assertTrue("Authenticated user with bad credentials", failed);
+        assertTrue("Authenticated user with bad credentials", failed);
     }
 }

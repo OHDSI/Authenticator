@@ -1,0 +1,16 @@
+authenticator:
+  methods:
+    rest-arachne:
+      config:
+        proxy:
+          enabled: true
+          #this proxy ip is not fixed, so it could change. To fix this use any available proxy
+          host: 167.99.232.18
+          port: 8080
+    rest-atlas:
+      config:
+        proxy:
+          enabled: true
+          #this proxy ip is not fixed, so it could change. To fix this use any available proxy
+          host: 167.99.232.18
+          port: 8080

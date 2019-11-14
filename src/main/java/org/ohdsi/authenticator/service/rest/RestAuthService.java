@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.service.BaseAuthService;
+import org.ohdsi.authenticator.service.rest.config.HttpPart;
+import org.ohdsi.authenticator.service.rest.config.RestAuthServiceConfig;
+import org.ohdsi.authenticator.service.rest.config.TokenSource;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
@@ -35,9 +37,11 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private static final String TOKEN_KEY = "token";
 
-    public RestAuthService(RestAuthServiceConfig config) {
+    private RestTemplateProvider restTemplateProvider;
 
+    public RestAuthService(RestAuthServiceConfig config) {
         super(config);
+        this.restTemplateProvider = new RestTemplateProvider(config.getProxy());
     }
 
     @Override
@@ -45,7 +49,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
         UsernamePasswordCredentials creds = (UsernamePasswordCredentials) request;
 
-        RestTemplate restTemplate = getRestTemplate();
+        RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
 
         HttpHeaders headers = getAuthHeaders();
         Map<String, String> body = getAuthBody(creds);
@@ -81,7 +85,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
             String remoteToken = claims.get(TOKEN_KEY).toString();
             AuthenticationBuilder authBuilder = new AuthenticationBuilder();
 
-            RestTemplate restTemplate = getRestTemplate();
+            RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
             MultiValueMap<String, String> headers = getHeadersWithToken(remoteToken);
             HttpEntity httpEntity = new HttpEntity(new HashMap<>(), headers);
             ResponseEntity<String> response = restTemplate.exchange(config.getRefresh().getUrl(), HttpMethod.POST, httpEntity, String.class);
@@ -188,7 +192,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private ResponseEntity<String> queryUserInfo(String token) {
 
-        RestTemplate restTemplate = getRestTemplate();
+        RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
         MultiValueMap<String, String> headers = getHeadersWithToken(token);
         Map<String, String> body = new HashMap<>();
         HttpEntity httpEntity = new HttpEntity(body, headers);
@@ -224,10 +228,5 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
             Date expirationDate = extractExpirationDate(remoteToken);
             builder.setExpirationDate(expirationDate);
         }
-    }
-
-    protected RestTemplate getRestTemplate() {
-
-        return new RestTemplate();
     }
 }
