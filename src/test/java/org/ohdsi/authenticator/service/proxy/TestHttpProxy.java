@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  Basically what is happening is
  - the client sends an HTTPS request to proxy it comes with CONNECT keyword.
  - The Proxy sends HTTP/1.1 200 OK to the client after establishing a connection with the upstream server.
- - The proxy is supplying the client's incoming input stream without headers/host, etc to the upstream server and incoming stream from the upstream server to the client.
+ - The proxy is supplying the client's incoming input stream to the upstream server and incoming stream from the upstream server to the client.
  */
 @Slf4j
 public class TestHttpProxy {
@@ -67,9 +67,6 @@ public class TestHttpProxy {
                 Matcher matcher = CONNECT_PATTERN.matcher(firstHeader);
 
                 if (matcher.matches()) {
-
-                    this.skipAllHeaders(scanner);
-
                     String forwardHost = matcher.group(1);
                     String forwardPort = matcher.group(2);
                     String httpVersion = matcher.group(3);
@@ -96,14 +93,6 @@ public class TestHttpProxy {
             } catch (IOException e) {
                 log.error("Inner exception", e);
             }
-        }
-
-        private void skipAllHeaders(Scanner scanner) {
-
-            String header;
-            do {
-                header = scanner.nextLine();
-            } while (!scanner.hasNextLine() || StringUtils.isEmpty(header));
         }
 
         private boolean forwardData(Socket inputSocket, Socket outputSocket) {
