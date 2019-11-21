@@ -12,12 +12,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  This is a really simple implementation of Http Proxy.
  Basically what is happening is
- - the client sends an HTTPS request to proxy it comes with CONNECT keyword.
+ - The client sends an HTTPS request to proxy it comes with CONNECT keyword.
  - The Proxy sends HTTP/1.1 200 OK to the client after establishing a connection with the upstream server.
  - The proxy is supplying the client's incoming input stream to the upstream server and incoming stream from the upstream server to the client.
  */
@@ -63,7 +62,7 @@ public class TestHttpProxy {
                  OutputStreamWriter outputStreamWriter = new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.ISO_8859_1)
             ) {
                 if (!scanner.hasNextLine()) {
-                    outputStreamWriter.write("HTTP/1.1 400 Empty request. \r\n Proxy-agent: " + APP_NAME + "\n\n \r\n");
+                    outputStreamWriter.write("HTTP/1.1 400 Empty request. \r\n Proxy-agent: " + APP_NAME + "\r\n\r\n");
                     outputStreamWriter.flush();
                     return;
                 }
@@ -78,7 +77,7 @@ public class TestHttpProxy {
 
                     try (Socket forwardSocket = new Socket(forwardHost, Integer.parseInt(forwardPort))) {
 
-                        outputStreamWriter.write("HTTP/" + httpVersion + " 200 Connection established\r\n Proxy-agent: " + APP_NAME + "\n\n \r\n");
+                        outputStreamWriter.write("HTTP/" + httpVersion + " 200 Connection established\r\n Proxy-agent: " + APP_NAME + "\r\n\r\n");
                         outputStreamWriter.flush();
 
                         Executors.newFixedThreadPool(2).invokeAll(Arrays.asList(
@@ -87,11 +86,11 @@ public class TestHttpProxy {
                         ));
 
                     } catch (IOException | NumberFormatException e) {
-                        outputStreamWriter.write("HTTP/" + httpVersion + " 502 Bad Gateway\r\n Proxy-agent: " + APP_NAME + "\r\n \r\n");
+                        outputStreamWriter.write("HTTP/" + httpVersion + " 502 Bad Gateway\r\n Proxy-agent: " + APP_NAME + "\r\n\r\n");
                         outputStreamWriter.flush();
                     } catch (InterruptedException e) {
                         log.error("Inner exception", e);
-                        outputStreamWriter.write("HTTP/1.1 500 Inner error. \r\n Proxy-agent: " + APP_NAME + "\n\n \r\n");
+                        outputStreamWriter.write("HTTP/1.1 500 Inner error. \r\n Proxy-agent: " + APP_NAME + "\r\n\r\n");
                         outputStreamWriter.flush();
                     }
                 }
