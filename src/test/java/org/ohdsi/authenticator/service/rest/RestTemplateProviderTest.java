@@ -3,10 +3,15 @@ package org.ohdsi.authenticator.service.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.ohdsi.authenticator.service.proxy.ProxyInitializer;
 import org.ohdsi.authenticator.service.rest.config.ProxyConfig;
 import org.springframework.http.HttpMethod;
@@ -14,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RestTemplateProviderTest {
 
     public static final String TEST_URL = "https://www.arachnenetwork.com/api/v1/build-number";
@@ -55,8 +61,13 @@ public class RestTemplateProviderTest {
         );
 
         RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
+
+        // httpProxySpy is shared among all unit tests so it is possible that `handleRequest` method was already invoked,
+        // to avoid this we reset our spy
+        Mockito.reset(ProxyInitializer.httpProxySpy);
         ResponseEntity<String> response = restTemplate.exchange(TEST_URL, HttpMethod.GET, null, String.class);
 
+        verify(ProxyInitializer.httpProxySpy).handleRequest(any());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().contains("buildNumber"));

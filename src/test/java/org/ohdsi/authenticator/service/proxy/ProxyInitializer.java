@@ -3,14 +3,15 @@ package org.ohdsi.authenticator.service.proxy;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
+import org.mockito.Mockito;
 
 
 /**
- * Proxy should be start only ONCE for all unit tests!!
+ * The proxy should be started only ONCE for all unit tests!!
  */
 public class ProxyInitializer extends ExternalResource {
 
-    public static TestHttpProxy server = new TestHttpProxy();
+    public static TestHttpProxy httpProxySpy = Mockito.spy(new TestHttpProxy());
 
     public static final TestRule INSTANCE = new ProxyInitializer();
     private AtomicBoolean started = new AtomicBoolean();
@@ -24,6 +25,6 @@ public class ProxyInitializer extends ExternalResource {
     }
 
     private void startProxy() {
-        server.start();
+        httpProxySpy.start();
     }
 }

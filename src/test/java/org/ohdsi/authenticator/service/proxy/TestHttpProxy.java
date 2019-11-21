@@ -33,13 +33,18 @@ public class TestHttpProxy {
             try (ServerSocket serverSocket = new ServerSocket(HTTP_PROXY_PORT)) {
                 Socket socket;
                 while ((socket = serverSocket.accept()) != null) {
-                    RequestHandler requestHandler = new RequestHandler(socket);
-                    requestHandler.start();
+                    handleRequest(socket);
                 }
             } catch (IOException e) {
                 log.error("Inner exception", e);
             }
-        });
+        }).start();
+    }
+
+    public void handleRequest(Socket socket) {
+
+        RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.start();
     }
 
     public static class RequestHandler extends Thread {
