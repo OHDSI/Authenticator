@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service.rest;
+package org.ohdsi.authenticator.service.rest.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +17,5 @@ public class RestAuthServiceConfig extends AuthServiceConfig {
     private TokenConfig token;
     private String infoUrl;
     private RefreshTokenConfig refresh;
+    private ProxyConfig proxy;
 }
