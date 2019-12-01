@@ -9,15 +9,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
-import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenSignatureVerifier;
-import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenVerifier;
 import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenSignatureVerifier;
 import org.ohdsi.authenticator.service.support.GoogleIapTestUtils;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles(profiles = { "test", "test-iap" })
 public class GoogleIapAuthenticationTest extends BaseTest {
@@ -56,8 +57,8 @@ public class GoogleIapAuthenticationTest extends BaseTest {
         String accessToken = createAccessToken("refresh-token@email.com");
 
         UserInfo userInfo = authenticator.refreshToken(accessToken);
-        Assert.assertEquals(accessToken, userInfo.getToken());
-        Assert.assertEquals("refresh-token@email.com", userInfo.getUsername());
+        Assert.assertEquals(accessToken, userInfo.getAuthenticationInfo().getToken());
+        Assert.assertEquals("refresh-token@email.com", userInfo.getUser().getUsername());
 
     }
 

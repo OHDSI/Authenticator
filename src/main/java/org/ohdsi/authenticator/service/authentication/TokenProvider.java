@@ -13,4 +13,6 @@ public interface TokenProvider {
 
     String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate);
 
+    <T> T resolveValue(String token, String key, Class<T> valueClass);
+
 }

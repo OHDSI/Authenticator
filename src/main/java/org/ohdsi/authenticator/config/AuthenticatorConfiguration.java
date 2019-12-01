@@ -1,7 +1,10 @@
 package org.ohdsi.authenticator.config;
 
+import org.ohdsi.authenticator.mapper.TokenClaimsToUserInfoConverter;
+import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
 import org.ohdsi.authenticator.service.authentication.AuthenticationMode;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.authenticator.AuthServiceProviderImpl;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorProxyMode;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorStandardMode;
 import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenSignatureVerifier;
@@ -9,7 +12,8 @@ import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenVer
 import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
 import org.ohdsi.authenticator.service.authentication.provider.JwtTokenProvider;
 import org.ohdsi.authenticator.service.authentication.TokenProvider;
-import org.ohdsi.authenticator.service.authentication.TokenService;
+import org.ohdsi.authenticator.service.authentication.UserService;
+import org.ohdsi.authenticator.service.authentication.user.AuthUserServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +27,9 @@ public class AuthenticatorConfiguration {
     public class StandardMode {
 
         @Bean
-        public Authenticator authentication(AuthSchema authSchema, TokenService tokenService, TokenProvider tokenProvider) {
+        public Authenticator authentication(UserService userService, TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
 
-            return new AuthenticatorStandardMode(authSchema, tokenService, tokenProvider);
+            return new AuthenticatorStandardMode(userService, tokenProvider, authServiceProvider);
         }
 
         @Bean
@@ -34,15 +38,16 @@ public class AuthenticatorConfiguration {
 
             return new JwtTokenProvider(secretKey, validityInSeconds);
         }
+
     }
 
     @Configuration
     @ConditionalOnProperty(value = "security.authentication.mode", havingValue = AuthenticationMode.Const.PROXY, matchIfMissing = false)
     public class ProxyMode {
         @Bean
-        public Authenticator authentication(TokenService tokenService, TokenProvider tokenProvider) {
+        public Authenticator authentication(UserService userService, TokenProvider tokenProvider) {
 
-            return new AuthenticatorProxyMode(tokenService, tokenProvider);
+            return new AuthenticatorProxyMode(userService, tokenProvider);
         }
 
         @Bean
@@ -64,6 +69,21 @@ public class AuthenticatorConfiguration {
 
             return new GoogleIapTokenSignatureVerifier();
         }
+    }
+
+    @Bean
+    public AuthServiceProviderImpl authServiceHolder(AuthSchema authSchema) {
+        return new AuthServiceProviderImpl(authSchema);
+    }
+
+    @Bean
+    public TokenClaimsToUserInfoConverter tokenClaimsToUserInfoConverter(TokenProvider tokenProvider) {
+        return new TokenClaimsToUserInfoConverter(tokenProvider);
+    }
+
+    @Bean
+    public UserService authUserService(TokenProvider tokenProvider, AuthServiceProvider authServiceProvider, TokenClaimsToUserInfoConverter converter){
+        return new  AuthUserServiceImpl(tokenProvider, authServiceProvider, converter);
     }
 
 }

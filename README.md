@@ -49,7 +49,10 @@ Common configuration parameters:
 - `fieldsToExtract`:
   - keys represent names of user's properties, which will be stored in JWT body / UserInfo.additionalInfo
   - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin 
-
+- `fieldsToUser`
+  - keys represent names of user' properties, which will be stored in UserInfo.user object.
+  - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin
+    
 #### Database (JDBC) authentication
 
 - SQL query must return a single row

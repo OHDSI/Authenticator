@@ -11,6 +11,17 @@ objectClass: organizationalUnit
 objectClass: top
 ou: users
 
+dn: cn=administrator,ou=users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: top
+cn: administrator
+sn: LastName
+displayName: FirstName
+initials: Middle
+uid: administrator
+
 dn: cn=user,ou=users,dc=example,dc=com
 objectClass: organizationalPerson
 objectClass: person

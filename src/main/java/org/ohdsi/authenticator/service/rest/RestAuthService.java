@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import lombok.var;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
@@ -34,10 +34,17 @@ import org.springframework.web.client.RestTemplate;
 public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private static final String TOKEN_KEY = "token";
+    public static final String AUTH_METHOD_NAME = "REST";
 
     public RestAuthService(RestAuthServiceConfig config) {
 
         super(config);
+    }
+
+    @Override
+    public String getMethodName() {
+
+        return AUTH_METHOD_NAME;
     }
 
     @Override
@@ -63,7 +70,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
             Map<String, String> details = Stream.of(remoteToken)
                     .map(this::queryUserInfo)
-                    .map(this::extractUserDetails)
+                    .map(token -> this.extractUserDetails(creds.getUsername(), token))
                     .findFirst().orElseThrow(() -> new AuthenticationException(INFO_EXTRACTION_ERROR));
             details.put(TOKEN_KEY, remoteToken);
 
@@ -195,11 +202,12 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
         return restTemplate.exchange(config.getInfoUrl(), HttpMethod.GET, httpEntity, String.class);
     }
 
-    private Map<String, String> extractUserDetails(ResponseEntity<String> responseEntity) {
+    private Map<String, String> extractUserDetails(String username, ResponseEntity<String> responseEntity) {
 
         try {
             Map<?,?> responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
-            return extractUserDetails(responseBodyJson);
+            UserInfo userInfo = extractUserDetails(username, responseBodyJson);
+            return userInfo.getAdditionalInfo();
         } catch (Exception ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
         }

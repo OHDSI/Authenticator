@@ -25,9 +25,9 @@ public class DatabaseAuthenticationTest extends BaseTest {
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials("admin", "password");
         UserInfo userInfo = authenticator.authenticate(METHOD, authRequest);
         Assert.isTrue(
-                Objects.equals(userInfo.getUsername(), authRequest.getUsername())
-                        && Objects.nonNull(userInfo.getToken())
-                        && Objects.equals(userInfo.getAuthMethod(), METHOD)
+                Objects.equals(userInfo.getUser().getUsername(), authRequest.getUsername())
+                        && Objects.nonNull(userInfo.getAuthenticationInfo().getToken())
+                        && Objects.equals(userInfo.getAuthenticationInfo().getAuthMethod(), METHOD)
                         && Objects.equals(userInfo.getAdditionalInfo().get("firstName"), "Pavel")
                         && Objects.equals(userInfo.getAdditionalInfo().get("lastName"), "Grafkin"),
                 "Failed to authenticate user with proper credentials"

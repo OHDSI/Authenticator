@@ -1,5 +1,6 @@
 package org.ohdsi.authenticator.service.authentication.provider;
 
+import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 
@@ -12,6 +13,14 @@ public abstract class AbstractInvalidatableTokenProvider implements TokenProvide
     protected static final String INVALID_TOKEN_ERROR = "Expired or invalid JWT token";
     public static final String EMPTY_TOKEN_ERROR = "Empty token";
     protected Set<String> invalidatedTokens = new CopyOnWriteArraySet<>();
+
+
+    @Override
+    public <T> T resolveValue(String token, String key, Class<T> valueClass) {
+
+        Claims claims = validateTokenAndGetClaims(token);
+        return claims.get(key, valueClass);
+    }
 
     @Override
     public void invalidateToken(String token) {

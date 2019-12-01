@@ -94,7 +94,7 @@ public class GithubAuthenticationTest extends FluentTest {
 
         UserInfo userInfo = authenticator.authenticate("github", new TokenCredentials(code));
 
-        Assert.isTrue(Objects.equals(userInfo.getUsername(), username), "User was not authenticated");
+        Assert.isTrue(Objects.equals(userInfo.getUser().getUsername(), username), "User was not authenticated");
 
         // File scrFile = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.FILE);
         // FileUtils.copyFile(scrFile, new File("d:\\screenshot.png"));

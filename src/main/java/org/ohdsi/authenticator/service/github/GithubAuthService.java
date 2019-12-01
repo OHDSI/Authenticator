@@ -1,9 +1,11 @@
 package org.ohdsi.authenticator.service.github;
 
 import com.github.scribejava.apis.GitHubApi;
-import lombok.var;
+import java.util.Map;
+import java.util.Objects;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
@@ -13,10 +15,9 @@ import org.pac4j.oauth.credentials.OAuth20Credentials;
 import org.pac4j.oauth.profile.OAuth20Profile;
 import org.pac4j.oauth.profile.github.GitHubProfileDefinition;
 
-import java.util.Map;
-import java.util.Objects;
-
 public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> {
+
+    public static final String AUTH_METHOD_NAME = "GITHUB";
 
     private OAuth20Configuration oAuthConfig;
     private OAuth20Client oAuthClient;
@@ -26,6 +27,12 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
         super(config);
         this.initOAuthConfig();
         this.initOAuthClient();
+    }
+
+    @Override
+    public String getMethodName() {
+
+        return AUTH_METHOD_NAME;
     }
 
     @Override
@@ -47,8 +54,8 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
                 .create(oAuthCredentials, null)
                 .orElseThrow(() -> new AuthenticationException("Cannot retrieve profile"));
 
-        Object username = profile.getAttribute(config.getUsernameProperty()).toString();
-        Map<String, String>  details = extractUserDetails(profile);
+        String username = profile.getAttribute(config.getUsernameProperty()).toString();
+        Map<String, String>  details = extractUserDetails(username, profile);
 
         return new AuthenticationBuilder()
                 .setAuthenticated(true)
@@ -82,8 +89,9 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
         return oAuthConfig.buildService(null, oAuthClient, null).getAuthorizationUrl();
     }
 
-    private Map<String, String> extractUserDetails(OAuth20Profile profile) {
+    private Map<String, String> extractUserDetails(String username, OAuth20Profile profile) {
 
-        return extractUserDetails(profile.getAttributes());
+        UserInfo userInfo = extractUserDetails(username, profile.getAttributes());
+        return userInfo.getAdditionalInfo();
     }
 }

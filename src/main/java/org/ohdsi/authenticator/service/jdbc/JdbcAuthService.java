@@ -5,6 +5,7 @@ import java.sql.ResultSetMetaData;
 import lombok.var;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
@@ -20,6 +21,8 @@ import java.util.Map;
 
 public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
 
+    public static final String AUTH_METHOD_NAME = "JDBC";
+
     private static final String USERNAME_PARAM = "username";
     private static final String PASSWORD_PARAM = "password";
 
@@ -33,14 +36,22 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
         this.passwordEncoder = getPasswordEncoder();
     }
 
+
+    @Override
+    public String getMethodName() {
+
+        return AUTH_METHOD_NAME;
+    }
+
     @Override
     public AuthenticationToken authenticate(Credentials credentials) {
 
         UsernamePasswordCredentials creds = (UsernamePasswordCredentials) credentials;
 
+
         NamedParameterJdbcTemplate ps = new NamedParameterJdbcTemplate(ds);
         MapSqlParameterSource params = buildQueryParams(creds);
-        Map<String, String> details = ps.queryForObject(config.getQuery(), params, this::mapUserInfo);
+        Map<String, String> details = ps.queryForObject(config.getQuery(), params, (rs, rowNum) -> mapUserInfo(creds.getUsername(), rs));
         boolean isAuthenticated = isSuccessfulLogin(creds, details.remove(PASSWORD_PARAM));
         return new AuthenticationBuilder()
                 .setAuthenticated(isAuthenticated)
@@ -70,10 +81,11 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
         return params;
     }
 
-    private Map<String, String> mapUserInfo(ResultSet rs, int rowNum) {
+    private Map<String, String> mapUserInfo(String username, ResultSet rs) {
 
         try {
-            Map<String, String>  details = extractUserDetails(rsRowToMap(rs));
+            UserInfo userInfo = extractUserDetails(username, rsRowToMap(rs));
+            Map<String, String> details = userInfo.getAdditionalInfo();
             details.put(PASSWORD_PARAM, rs.getString(PASSWORD_PARAM));
             return details;
         } catch (SQLException ex) {

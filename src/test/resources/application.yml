@@ -75,9 +75,13 @@ authenticator:
         userDn: uid=admin,ou=system
         password: secret
         url: ldap://localhost:8389
-        searchFilter: uid={0}
+        searchFilter: (objectClass=inetOrgPerson)
         countLimit: 0
         ignorePartialResultException: true
+        fieldsToUser:
+          username: uid
+          firstName: displayName
+          lastName: sn
         fieldsToExtract:
           firstName: displayName
           lastName: sn
@@ -92,9 +96,12 @@ authenticator:
         domainSuffix: example.com
         url: ldap://localhost:9389
         # For real AD userPrincipalName attribute should be used
-        #searchFilter: userPrincipalName={0}
-        searchFilter: uid={0}
+        searchFilter: (objectClass=inetOrgPerson)
         ignorePartialResultException: true
+        fieldsToUser:
+          username: uid
+          firstName: givenName
+          lastName: sn
         fieldsToExtract:
           firstName: givenName
           lastName: sn

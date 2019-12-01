@@ -3,16 +3,16 @@ package org.ohdsi.authenticator.service;
 import io.jsonwebtoken.Claims;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.ohdsi.authenticator.mapper.AttributesToUserInfoConverter;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.service.authentication.config.AuthServiceConfig;
 import org.pac4j.core.credentials.Credentials;
-import org.springframework.context.expression.MapAccessor;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public abstract class BaseAuthService<T extends AuthServiceConfig> implements AuthService<T>{
+public abstract class BaseAuthService<T extends AuthServiceConfig> implements AuthService {
 
     protected static final String INFO_EXTRACTION_ERROR = "Cannot extract user info";
 
@@ -23,33 +23,41 @@ public abstract class BaseAuthService<T extends AuthServiceConfig> implements Au
         this.config = config;
     }
 
+    @Override
     abstract public AuthenticationToken authenticate(Credentials credentials);
 
+    @Override
     public AuthenticationToken refreshToken(Claims claims) {
 
         return new AuthenticationBuilder()
-            .setAuthenticated(true)
-            .setUsername(claims.getSubject())
-            .setUserDetails((Map) claims)
-            .build();
+                .setAuthenticated(true)
+                .setUsername(claims.getSubject())
+                .setUserDetails((Map) claims)
+                .build();
     }
 
-    protected Map<String, String> extractUserDetails(Map rawData) {
+    @Override
+    public Optional<UserInfo> findUser(String username) {
 
-        ExpressionParser parser = new SpelExpressionParser();
-        StandardEvaluationContext context = new StandardEvaluationContext(rawData);
-        context.addPropertyAccessor(new MapAccessor());
-
-        Map<String, String> details = new HashMap<>();
-        config.getFieldsToExtract().forEach((k, e) -> {
-            String val = parser.parseExpression(e).getValue(context, String.class);
-            details.put(k, val);
-        });
-
-        return details;
+        throw new UnsupportedOperationException(String.format("'%s' Authentication configuration with '%s' authentication method, does not support findUser method", this.getMethodName()));
     }
 
-    public class AuthenticationBuilder {
+    @Override
+    public List<UserInfo> findAllUsers() {
+
+        throw new UnsupportedOperationException(String.format("'%s' Authentication configuration with '%s' authentication method, does not support findAllUsers method", this.getMethodName()));
+
+    }
+
+    protected UserInfo extractUserDetails(String username, Map rawData) {
+
+        AttributesToUserInfoConverter converter = new AttributesToUserInfoConverter(username, rawData, config);
+        UserInfo userInfo = converter.extractUserDetails();
+
+        return userInfo;
+    }
+
+    public static class AuthenticationBuilder {
 
         private boolean authenticated = false;
         private String username;

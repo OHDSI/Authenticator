@@ -1,13 +1,22 @@
 package org.ohdsi.authenticator.service;
 
 import io.jsonwebtoken.Claims;
+import java.util.List;
+import java.util.Optional;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.UserInfo;
 import org.pac4j.core.credentials.Credentials;
 
-public interface AuthService<T extends AuthServiceConfig> {
+public interface AuthService {
 
     AuthenticationToken authenticate(Credentials credentials);
 
     AuthenticationToken refreshToken(Claims claims);
+
+    Optional<UserInfo> findUser(String username);
+
+    List<UserInfo> findAllUsers();
+
+    String getMethodName();
 
 }
