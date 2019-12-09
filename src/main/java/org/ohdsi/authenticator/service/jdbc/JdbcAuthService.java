@@ -1,23 +1,22 @@
 package org.ohdsi.authenticator.service.jdbc;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import lombok.var;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ClassUtils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
 
@@ -51,13 +50,22 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
 
         NamedParameterJdbcTemplate ps = new NamedParameterJdbcTemplate(ds);
         MapSqlParameterSource params = buildQueryParams(creds);
-        Map<String, String> details = ps.queryForObject(config.getQuery(), params, (rs, rowNum) -> mapUserInfo(creds.getUsername(), rs));
-        boolean isAuthenticated = isSuccessfulLogin(creds, details.remove(PASSWORD_PARAM));
-        return new AuthenticationBuilder()
-                .setAuthenticated(isAuthenticated)
-                .setUsername(creds.getUsername())
-                .setUserDetails(details)
-                .build();
+
+        try {
+            Map<String, String> details = ps.queryForObject(
+                    config.getQuery(),
+                    params,
+                    (rs, rowNum) -> mapUserInfo(creds.getUsername(), rs)
+            );
+            boolean isAuthenticated = isSuccessfulLogin(creds, details.remove(PASSWORD_PARAM));
+            return new AuthenticationBuilder()
+                    .setAuthenticated(isAuthenticated)
+                    .setUsername(creds.getUsername())
+                    .setUserDetails(details)
+                    .build();
+        } catch (EmptyResultDataAccessException ex) {
+            throw new AuthenticationException("Bad credentials", ex);
+        }
     }
 
     private void initConnectionPool() {
