@@ -38,7 +38,7 @@ public class RefreshTokenTest extends BaseTest {
 
         String token = createDummyToken("db");
         Assert.isTrue(getExpirationInSecs(token) <= DUMMY_EXP_IN_SEC, "Wrong dummy token");
-        String newToken = authenticator.refreshToken(token).getAuthenticationInfo().getToken();
+        String newToken = authenticator.refreshToken(token).getToken();
 
         long newExpInSecs = getExpirationInSecs(newToken);
         Assert.isTrue(
@@ -55,13 +55,13 @@ public class RefreshTokenTest extends BaseTest {
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(arachneUsername, arachnePassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
-        String token = userInfo.getAuthenticationInfo().getToken();
+        String token = userInfo.getToken();
 
         Date originalExpDate = tokenProvider.validateTokenAndGetClaims(token).getExpiration();
 
         Thread.sleep(1000L);
 
-        String newToken =  authenticator.refreshToken(token).getAuthenticationInfo().getToken();
+        String newToken =  authenticator.refreshToken(token).getToken();
 
         Date newExpDate = tokenProvider.validateTokenAndGetClaims(newToken).getExpiration();
         long newExpInSecs = getExpirationInSecs(newToken);

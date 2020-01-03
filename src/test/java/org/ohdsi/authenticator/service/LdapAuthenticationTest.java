@@ -40,8 +40,8 @@ public class LdapAuthenticationTest extends BaseTest {
         assertThat(credentials.getUsername(),
                 is(equalTo(userInfo.getUser().getUsername())));
         assertThat(options.getMethod(),
-                equalTo(userInfo.getAuthenticationInfo().getAuthMethod()));
-        assertThat(userInfo.getAuthenticationInfo().getToken(),
+                equalTo(userInfo.getAuthMethod()));
+        assertThat(userInfo.getToken(),
                 notNullValue());
         assertThat(userInfo.getUser().getUsername(),
                 equalTo(credentials.getUsername()));

@@ -14,19 +14,13 @@ import java.util.Map;
 @Builder
 public class UserInfo {
 
-    private AuthenticationInfo authenticationInfo;
+    private String username;
+    private String token;
+    private String authMethod;
 
     private User user;
 
     private Map<String, String> additionalInfo = new HashMap<>();
-
-    @Getter
-    @Setter
-    @Builder
-    public static class AuthenticationInfo {
-        private String authMethod;
-        private String token;
-    }
 
     @Getter
     @Setter

@@ -57,7 +57,7 @@ public class GoogleIapAuthenticationTest extends BaseTest {
         String accessToken = createAccessToken("refresh-token@email.com");
 
         UserInfo userInfo = authenticator.refreshToken(accessToken);
-        Assert.assertEquals(accessToken, userInfo.getAuthenticationInfo().getToken());
+        Assert.assertEquals(accessToken, userInfo.getToken());
         Assert.assertEquals("refresh-token@email.com", userInfo.getUser().getUsername());
 
     }

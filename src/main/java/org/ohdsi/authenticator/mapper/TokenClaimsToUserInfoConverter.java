@@ -34,14 +34,10 @@ public class TokenClaimsToUserInfoConverter {
                 .lastname(claims.get("lastName", String.class))
                 .build();
 
-        UserInfo.AuthenticationInfo authenticationInfo = UserInfo.AuthenticationInfo.builder()
-                .authMethod(claims.get(AuthServiceProvider.METHOD_KEY, String.class))
-                .token(token)
-                .build();
-
         return UserInfo.builder()
-
-                .authenticationInfo(authenticationInfo)
+                .username(user.getUsername())
+                .token(token)
+                .authMethod(claims.get(AuthServiceProvider.METHOD_KEY, String.class))
                 .user(user)
                 .additionalInfo(additionalInfo)
                 .build();
