@@ -206,8 +206,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
         try {
             Map<?,?> responseBodyJson = new ObjectMapper().readValue(responseEntity.getBody(), Map.class);
-            UserInfo userInfo = extractUserDetails(username, responseBodyJson);
-            return userInfo.getAdditionalInfo();
+            return extractUserDetails(username, responseBodyJson);
         } catch (Exception ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
         }

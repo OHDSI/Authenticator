@@ -178,6 +178,20 @@ Authentication across directory requires special system account that is used to 
         fieldsToExtract:
           firstName: displayName
           lastName: sn
+        fieldsToUser:
+          firstName: displayName
+          lastName: sn
+          email: mail
+          organization: company
+          department: department
+          affiliation: company
+          personalSummary: description
+          phone: telephoneNumber
+          mobile: mobile
+          address1: streetAddress
+          city: l
+          countryCode: c
+          zipCode: postalCode
 ``` 
 
 #### Active Directory authentication

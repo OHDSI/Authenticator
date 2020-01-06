@@ -2,12 +2,11 @@ package org.ohdsi.authenticator.mapper;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.authentication.config.AuthServiceConfig;
 import org.ohdsi.authenticator.service.directory.ldap.UserMappingConfig;
 import org.springframework.context.expression.MapAccessor;
@@ -18,7 +17,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.CollectionUtils;
 
-public class AttributesToUserInfoConverter {
+
+public class AttributesToUserConverter {
 
     public static final List<SpelMessage> FIEDL_NOT_FOUND_MESSAGE_CODES = Arrays.asList(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE);
     private ExpressionParser parser;
@@ -26,7 +26,7 @@ public class AttributesToUserInfoConverter {
     private AuthServiceConfig config;
     private String username;
 
-    public AttributesToUserInfoConverter(String username, Map<String, String> rawData, AuthServiceConfig config) {
+    public AttributesToUserConverter(String username, Map<String, String> rawData, AuthServiceConfig config) {
 
         this.username = username;
         this.config = config;
@@ -35,36 +35,40 @@ public class AttributesToUserInfoConverter {
         context.addPropertyAccessor(new MapAccessor());
     }
 
-    public UserInfo extractUserDetails() {
+    public static AttributesToUserConverter of(String username, Map<String, String> rawData, AuthServiceConfig config) {
 
-        return UserInfo.builder()
-                .user(mapUser(username, config.getFieldsToUser()))
-                .additionalInfo(mapDetails(config.getFieldsToExtract()))
-                .build();
+        return new AttributesToUserConverter(username, rawData, config);
     }
 
-    private UserInfo.User mapUser(String username, UserMappingConfig fieldToUser) {
+    public static AttributesToUserConverter of(Map<String, String> rawData, AuthServiceConfig config) {
 
-        if (fieldToUser == null) {
+        return new AttributesToUserConverter(null, rawData, config);
+    }
+
+    public User extractUserDetails() {
+
+        UserMappingConfig fieldsToUser = config.getFieldsToUser();
+
+        if (fieldsToUser == null) {
             return null;
         }
 
-        return UserInfo.User.builder()
-                .username(getUsername(username, fieldToUser))
-                .email(getValue(fieldToUser.getEmail()))
-                .firstname(getValue(fieldToUser.getFirstName()))
-                .middlename(getValue(fieldToUser.getMiddleName()))
-                .lastname(getValue(fieldToUser.getLastName()))
-                .organization(getValue(fieldToUser.getOrganization()))
-                .department(getValue(fieldToUser.getDepartment()))
-                .affiliation(getValue(fieldToUser.getAffiliation()))
-                .personalSummary(getValue(fieldToUser.getPersonalSummary()))
-                .phone(getValue(fieldToUser.getPhone()))
-                .mobile(getValue(fieldToUser.getPhone()))
-                .address1(getValue(fieldToUser.getAddress1()))
-                .city(getValue(fieldToUser.getCity()))
-                .zipCode(getValue(fieldToUser.getZipCode()))
-                .roles(getRoles(fieldToUser.getRoles(), fieldToUser.getMemberOf()))
+        return User.builder()
+                .username(getUsername(username, fieldsToUser))
+                .email(getValue(fieldsToUser.getEmail()))
+                .firstname(getValue(fieldsToUser.getFirstName()))
+                .middlename(getValue(fieldsToUser.getMiddleName()))
+                .lastname(getValue(fieldsToUser.getLastName()))
+                .organization(getValue(fieldsToUser.getOrganization()))
+                .department(getValue(fieldsToUser.getDepartment()))
+                .affiliation(getValue(fieldsToUser.getAffiliation()))
+                .personalSummary(getValue(fieldsToUser.getPersonalSummary()))
+                .phone(getValue(fieldsToUser.getPhone()))
+                .mobile(getValue(fieldsToUser.getPhone()))
+                .address1(getValue(fieldsToUser.getAddress1()))
+                .city(getValue(fieldsToUser.getCity()))
+                .zipCode(getValue(fieldsToUser.getZipCode()))
+                .roles(getRoles(fieldsToUser.getRoles(), fieldsToUser.getMemberOf()))
                 .build();
     }
 
@@ -74,22 +78,6 @@ public class AttributesToUserInfoConverter {
             return username;
         }
         return getValue(fieldToUser.getUsername());
-    }
-
-    private Map<String, String> mapDetails(Map<String, String> fieldsToExtract) {
-
-        if (fieldsToExtract == null) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> details = new HashMap<>();
-        fieldsToExtract.forEach((key, expression) -> {
-            String value = getValue(expression);
-            if (StringUtils.isNotEmpty(value)) {
-                details.put(key, value);
-            }
-        });
-        return details;
     }
 
     private List<String> getRoles(Map<String, String> roles, String expression) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.ohdsi.authenticator.mapper.TokenClaimsToUserInfoConverter;
 import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.AuthService;
 import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
@@ -51,14 +52,14 @@ public class AuthUserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserInfo> findUser(String method, String username) {
+    public Optional<User> findUser(String method, String username) {
 
         AuthService authService = authServiceProvider.getByMethod(method);
         return authService.findUser(username);
     }
 
     @Override
-    public List<UserInfo> findAllUsers(String method) {
+    public List<User> findAllUsers(String method) {
 
         AuthService authService = authServiceProvider.getByMethod(method);
         return authService.findAllUsers();

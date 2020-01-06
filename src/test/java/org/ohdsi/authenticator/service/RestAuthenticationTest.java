@@ -39,7 +39,7 @@ public class RestAuthenticationTest extends BaseTest {
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
 
         String accessToken = userInfo.getToken();
-        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUser().getUsername());
+        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
         Assert.assertTrue("Failed to authenticate user with proper credentials", getExpirationInSecs(accessToken) >= jwtTokenProvider.getValidityInSeconds());
 
     }
@@ -51,7 +51,7 @@ public class RestAuthenticationTest extends BaseTest {
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials(atlasUsername, atlasPassword);
         UserInfo userInfo = authenticator.authenticate(method, authRequest);
         String accessToken = userInfo.getToken();
-        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUser().getUsername());
+        Assert.assertEquals("Failed to authenticate user with proper credentials", authRequest.getUsername(), userInfo.getUsername());
         Assert.assertTrue("Failed to authenticate user with proper credentials", jwtTokenProvider.getValidityInSeconds() >= getExpirationInSecs(accessToken));
     }
 

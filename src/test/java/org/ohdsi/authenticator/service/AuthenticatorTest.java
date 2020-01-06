@@ -24,13 +24,13 @@ public class AuthenticatorTest extends BaseTest {
     public void testUserResolvedSuccessfully() {
 
         String token = tokenProvider.createToken( USERNAME, new HashMap<>(), null);
-        Assert.assertEquals("Cannot resolve user from token", USERNAME, userService.resolveUser(token).getUser().getUsername());
+        Assert.assertEquals("Cannot resolve user from token", USERNAME, userService.resolveUser(token).getUsername());
     }
 
     @Test
     public void testUserResolutionFailure() {
 
         String token = tokenProvider.createToken(USERNAME, new HashMap<>(), null);
-        Assert.assertNotEquals("Resolved user from wrong token", "dummy", userService.resolveUser(token).getUser().getUsername());
+        Assert.assertNotEquals("Resolved user from wrong token", "dummy", userService.resolveUser(token).getUsername());
     }
 }

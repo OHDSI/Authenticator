@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ohdsi.authenticator.exception.AuthenticationException;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,12 +39,12 @@ public class LdapAuthenticationTest extends BaseTest {
         UsernamePasswordCredentials credentials = options.getAcceptableCreds();
         UserInfo userInfo = authenticator.authenticate(options.getMethod(), credentials);
         assertThat(credentials.getUsername(),
-                is(equalTo(userInfo.getUser().getUsername())));
+                is(equalTo(userInfo.getUsername())));
         assertThat(options.getMethod(),
                 equalTo(userInfo.getAuthMethod()));
         assertThat(userInfo.getToken(),
                 notNullValue());
-        assertThat(userInfo.getUser().getUsername(),
+        assertThat(userInfo.getUsername(),
                 equalTo(credentials.getUsername()));
 
         checkNormalUser(credentials, userInfo);
@@ -62,33 +63,32 @@ public class LdapAuthenticationTest extends BaseTest {
         assertThat(isAuthenticated, is(equalTo(false)));
     }
 
-
     @Test
     public void testFindUser() {
 
         UsernamePasswordCredentials credentials = options.getAcceptableCreds();
-        UserInfo userInfo = userService.findUser(options.getMethod(), credentials.getUsername()).orElse(null);
-        assertThat(userInfo, notNullValue());
+        User user = userService.findUser(options.getMethod(), credentials.getUsername()).orElse(null);
+        assertThat(user, notNullValue());
 
-        checkNormalUser(credentials, userInfo);
+        assertThat(user.getFirstname(), equalTo(options.getFirstName()));
+        assertThat(user.getLastname(), equalTo(options.getLastName()));
     }
 
 
     @Test
     public void findAllUsers() {
-
-        UsernamePasswordCredentials credentials = options.getAcceptableCreds();
-        List<UserInfo> userInfos = userService.findAllUsers(options.getMethod());
+        List<User> userInfos = userService.findAllUsers(options.getMethod());
 
         assertThat(userInfos.size(), equalTo(2));
 
-        UserInfo userInfo = userInfos.stream()
-                .filter(info -> StringUtils.equalsIgnoreCase(
+        User user = userInfos.stream()
+                .filter(u -> StringUtils.equalsIgnoreCase(
                         options.getFirstName(),
-                        info.getUser().getFirstname())
+                        u.getFirstname())
                 )
                 .findFirst().orElse(null);
-        checkNormalUser(credentials, userInfo);
+        assertThat(user.getFirstname(), equalTo(options.getFirstName()));
+        assertThat(user.getLastname(), equalTo(options.getLastName()));
     }
 
     private void checkNormalUser(UsernamePasswordCredentials credentials, UserInfo userInfo) {

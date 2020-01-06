@@ -92,8 +92,7 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
     private Map<String, String> mapUserInfo(String username, ResultSet rs) {
 
         try {
-            UserInfo userInfo = extractUserDetails(username, rsRowToMap(rs));
-            Map<String, String> details = userInfo.getAdditionalInfo();
+            Map<String, String> details = extractUserDetails(username, rsRowToMap(rs));
             details.put(PASSWORD_PARAM, rs.getString(PASSWORD_PARAM));
             return details;
         } catch (SQLException ex) {

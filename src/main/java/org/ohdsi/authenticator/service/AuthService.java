@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.Optional;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.model.User;
 import org.pac4j.core.credentials.Credentials;
 
 public interface AuthService {
@@ -13,9 +13,9 @@ public interface AuthService {
 
     AuthenticationToken refreshToken(Claims claims);
 
-    Optional<UserInfo> findUser(String username);
+    Optional<User> findUser(String username);
 
-    List<UserInfo> findAllUsers();
+    List<User> findAllUsers();
 
     String getMethodName();
 

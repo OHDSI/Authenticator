@@ -26,19 +26,10 @@ public class TokenClaimsToUserInfoConverter {
                         v -> v.getValue().toString())
                 );
 
-        //I don't really like the fact that we map token values to the user
-        UserInfo.User user = UserInfo.User.builder()
-                .username(claims.getSubject())
-                .email(claims.get("email", String.class))
-                .firstname(claims.get("firstName", String.class))
-                .lastname(claims.get("lastName", String.class))
-                .build();
-
         return UserInfo.builder()
-                .username(user.getUsername())
+                .username(claims.getSubject())
                 .token(token)
                 .authMethod(claims.get(AuthServiceProvider.METHOD_KEY, String.class))
-                .user(user)
                 .additionalInfo(additionalInfo)
                 .build();
     }

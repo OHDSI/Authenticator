@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
@@ -55,7 +54,7 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
                 .orElseThrow(() -> new AuthenticationException("Cannot retrieve profile"));
 
         String username = profile.getAttribute(config.getUsernameProperty()).toString();
-        Map<String, String>  details = extractUserDetails(username, profile);
+        Map<String, String> details = extractUserDetails(username, profile);
 
         return new AuthenticationBuilder()
                 .setAuthenticated(true)
@@ -91,7 +90,6 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
 
     private Map<String, String> extractUserDetails(String username, OAuth20Profile profile) {
 
-        UserInfo userInfo = extractUserDetails(username, profile.getAttributes());
-        return userInfo.getAdditionalInfo();
+        return extractUserDetails(username, profile.getAttributes());
     }
 }

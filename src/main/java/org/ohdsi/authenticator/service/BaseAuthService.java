@@ -6,9 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.ohdsi.authenticator.mapper.AttributesToUserInfoConverter;
+import org.ohdsi.authenticator.mapper.AttributesToAdditionalInfoConverter;
 import org.ohdsi.authenticator.model.AuthenticationToken;
-import org.ohdsi.authenticator.model.UserInfo;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.authentication.config.AuthServiceConfig;
 import org.pac4j.core.credentials.Credentials;
 
@@ -37,24 +37,22 @@ public abstract class BaseAuthService<T extends AuthServiceConfig> implements Au
     }
 
     @Override
-    public Optional<UserInfo> findUser(String username) {
+    public Optional<User> findUser(String username) {
 
         throw new UnsupportedOperationException(String.format("'%s' Authentication configuration with '%s' authentication method, does not support findUser method", this.getMethodName()));
     }
 
     @Override
-    public List<UserInfo> findAllUsers() {
+    public List<User> findAllUsers() {
 
         throw new UnsupportedOperationException(String.format("'%s' Authentication configuration with '%s' authentication method, does not support findAllUsers method", this.getMethodName()));
 
     }
 
-    protected UserInfo extractUserDetails(String username, Map rawData) {
+    protected Map<String, String> extractUserDetails(String username, Map rawData) {
 
-        AttributesToUserInfoConverter converter = new AttributesToUserInfoConverter(username, rawData, config);
-        UserInfo userInfo = converter.extractUserDetails();
-
-        return userInfo;
+        AttributesToAdditionalInfoConverter converter = new AttributesToAdditionalInfoConverter(rawData, config);
+        return converter.convert();
     }
 
     public static class AuthenticationBuilder {
