@@ -18,4 +18,6 @@ public interface AuthService {
 
     String getMethod();
 
+    String getMethodType();
+
 }

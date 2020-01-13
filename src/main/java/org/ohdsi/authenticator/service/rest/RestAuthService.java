@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+import lombok.Getter;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.exception.BadCredentialsAuthenticationException;
@@ -33,6 +34,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
+
+    public static final String AUTH_METHOD_NAME = "REST";
 
     public RestAuthService(RestAuthServiceConfig config, String method) {
 
@@ -104,6 +107,12 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
                 .user(tokenInfo.getUser())
                 .build();
 
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
     private HttpHeaders getAuthHeaders() {

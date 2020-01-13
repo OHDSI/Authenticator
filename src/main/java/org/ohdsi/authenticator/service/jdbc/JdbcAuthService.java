@@ -21,6 +21,8 @@ import org.springframework.util.ClassUtils;
 
 public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
 
+    public static final String AUTH_METHOD_NAME = "JDBC";
+
     private static final String USERNAME_PARAM = "username";
     private static final String PASSWORD_PARAM = "password";
 
@@ -56,6 +58,12 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
         } catch (EmptyResultDataAccessException ex) {
             throw new BadCredentialsAuthenticationException(ex);
         }
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
     private void initConnectionPool() {

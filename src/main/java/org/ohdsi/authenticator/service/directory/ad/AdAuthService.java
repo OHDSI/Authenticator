@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 
 public class AdAuthService extends DirectoryBasedAuthService<AdAuthServiceConfig> {
 
+    public static final String AUTH_METHOD_NAME = "AD";
 
     public AdAuthService(AdAuthServiceConfig config, String method) {
 
@@ -17,16 +18,19 @@ public class AdAuthService extends DirectoryBasedAuthService<AdAuthServiceConfig
 
     @Override
     protected ContextSource initContextSource() {
+
         LdapContextSource contextSource = (LdapContextSource) super.initContextSource();
         contextSource.setAuthenticationSource(new AuthenticationSource() {
             @Override
             public String getPrincipal() {
+
                 String username = config.getUserDn();
                 return LdapNameUtils.isValidLdapName(username) ? username : getFullyQualifiedDomainNameUsername(username);
             }
 
             @Override
             public String getCredentials() {
+
                 return config.getPassword();
             }
         });
@@ -36,6 +40,7 @@ public class AdAuthService extends DirectoryBasedAuthService<AdAuthServiceConfig
 
     @Override
     protected String prepareUsername(String username) {
+
         return getFullyQualifiedDomainNameUsername(username);
     }
 
@@ -50,5 +55,11 @@ public class AdAuthService extends DirectoryBasedAuthService<AdAuthServiceConfig
             sb.append(domainSuffix);
         }
         return sb.toString();
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 }

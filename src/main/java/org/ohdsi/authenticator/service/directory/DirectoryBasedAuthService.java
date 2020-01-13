@@ -13,7 +13,9 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import org.apache.commons.lang3.StringUtils;
 import org.ohdsi.authenticator.exception.AuthenticationException;
+import org.ohdsi.authenticator.exception.BadCredentialsAuthenticationException;
 import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
@@ -137,6 +139,9 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                         }
                     });
         } catch (Exception ex) {
+            if (StringUtils.contains(ex.getMessage(), "LDAP: error code 49")) {
+                throw new BadCredentialsAuthenticationException(ex);
+            }
             throw new AuthenticationException("Authentication error", ex);
         }
     }

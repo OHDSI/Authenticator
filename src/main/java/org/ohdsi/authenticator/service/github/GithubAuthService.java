@@ -16,6 +16,8 @@ import org.pac4j.oauth.profile.github.GitHubProfileDefinition;
 
 public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> {
 
+    public static final String AUTH_METHOD_NAME = "GITHUB";
+
     private OAuth20Configuration oAuthConfig;
     private OAuth20Client oAuthClient;
 
@@ -54,6 +56,12 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
                 .username(username)
                 .user(user)
                 .build();
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
     private void initOAuthConfig() {
