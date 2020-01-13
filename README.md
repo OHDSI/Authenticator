@@ -47,11 +47,8 @@ The `STANDARD` authentication mode is the default mode, so it is not necessary t
 Common configuration parameters:
 
 - `fieldsToExtract`:
-  - keys represent names of user's properties, which will be stored in JWT body / UserInfo.additionalInfo
+  - keys represent names of user's properties, which will be stored in JWT body / UserInfo.user
   - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin 
-- `fieldsToUser`
-  - keys represent names of user' properties, which will be stored in UserInfo.user object.
-  - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin
     
 #### Database (JDBC) authentication
 
@@ -178,9 +175,6 @@ Authentication across directory requires special system account that is used to 
         fieldsToExtract:
           firstName: displayName
           lastName: sn
-        fieldsToUser:
-          firstName: displayName
-          lastName: sn
           email: mail
           organization: company
           department: department
@@ -192,6 +186,7 @@ Authentication across directory requires special system account that is used to 
           city: l
           countryCode: c
           zipCode: postalCode
+
 ``` 
 
 #### Active Directory authentication

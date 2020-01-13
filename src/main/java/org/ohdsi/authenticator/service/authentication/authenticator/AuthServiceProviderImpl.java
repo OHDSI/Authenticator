@@ -21,6 +21,7 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
 
     private AuthSchema authSchema;
     private ObjectMapper objectMapper;
+
     private Map<String, AuthService> authServices = new HashMap<>();
 
     public AuthServiceProviderImpl(AuthSchema authSchema) {
@@ -36,14 +37,14 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
     }
 
     @Override
-    public AuthService getByMethod(String method) {
+    public Optional<AuthService> getByMethod(String method) {
         if (StringUtils.isEmpty(method)) {
-            return null;
+            return Optional.empty();
         }
 
         return sanitizeAuthMethodName(method)
-                .map(m -> authServices.get(m))
-                .orElse(null);
+                .map(m -> authServices.get(m));
+
     }
 
     private void initServices(){
@@ -59,7 +60,7 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
                 Class configClass = resolveRequiredConfigClass(authServiceClass);
                 AuthServiceConfig config = resolveConfig(authMethodSettings.getConfig(), configClass);
 
-                AuthService authService = constructAuthService(authServiceClass, config);
+                AuthService authService = constructAuthService(authServiceClass, config, method);
                 sanitizeAuthMethodName(method)
                         .ifPresent(m -> authServices.put(m, authService));
             }
@@ -79,7 +80,7 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
         Constructor[] constructors = authServiceClass.getDeclaredConstructors();
         for (Constructor constructor : constructors) {
             Class[] params = constructor.getParameterTypes();
-            if (params.length == 1 && AuthServiceConfig.class.isAssignableFrom(params[0])) {
+            if (params.length == 2 && AuthServiceConfig.class.isAssignableFrom(params[0])) {
                 return params[0];
             }
         }
@@ -92,10 +93,12 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
         return (T) objectMapper.convertValue(rawConfig, targetType);
     }
 
-    private AuthService constructAuthService(Class authServiceClass, AuthServiceConfig config)
+    private AuthService constructAuthService(Class authServiceClass, AuthServiceConfig config, String method)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        return (AuthService) authServiceClass.getDeclaredConstructor(config.getClass()).newInstance(config);
+        return (AuthService) authServiceClass
+                .getDeclaredConstructor(config.getClass(), String.class)
+                .newInstance(config, method);
     }
 
 

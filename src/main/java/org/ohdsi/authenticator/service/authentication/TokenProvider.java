@@ -11,7 +11,7 @@ public interface TokenProvider {
 
     Claims validateTokenAndGetClaims(String token);
 
-    String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate);
+    String createToken(String username, Map<String, Object> userAdditionalInfo, Date expirationDate);
 
     <T> T resolveValue(String token, String key, Class<T> valueClass);
 

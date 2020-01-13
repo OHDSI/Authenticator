@@ -9,6 +9,8 @@ import org.ohdsi.authenticator.service.authentication.TokenProvider;
 import org.ohdsi.authenticator.service.authentication.UserService;
 import org.pac4j.core.credentials.Credentials;
 
+
+
 @Slf4j
 public class AuthenticatorProxyMode implements Authenticator {
 
@@ -25,7 +27,7 @@ public class AuthenticatorProxyMode implements Authenticator {
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
-        throw new AuthenticationException("Authentication is delegated to the proxy level, for PROXY authentication modeю");
+        throw new AuthenticationException("Authentication is delegated to the proxy level, for PROXY authentication mode.");
     }
 
     @Override
@@ -38,7 +40,9 @@ public class AuthenticatorProxyMode implements Authenticator {
     @Override
     public UserInfo refreshToken(String token) {
 
-        return userService.resolveUser(token);
+        UserInfo userInfo = userService.resolveUser(token);
+        userInfo.getUser().setUsername(userInfo.getUsername());
+        return userInfo;
     }
 
     @Override
@@ -46,6 +50,5 @@ public class AuthenticatorProxyMode implements Authenticator {
 
         tokenProvider.invalidateToken(token);
     }
-
 
 }

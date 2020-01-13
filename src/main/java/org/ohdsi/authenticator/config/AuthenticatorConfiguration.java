@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.config;
 
-import org.ohdsi.authenticator.mapper.TokenClaimsToUserInfoConverter;
 import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
 import org.ohdsi.authenticator.service.authentication.AuthenticationMode;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
@@ -27,9 +26,9 @@ public class AuthenticatorConfiguration {
     public class StandardMode {
 
         @Bean
-        public Authenticator authentication(UserService userService, TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
+        public Authenticator authentication( TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
 
-            return new AuthenticatorStandardMode(userService, tokenProvider, authServiceProvider);
+            return new AuthenticatorStandardMode(tokenProvider, authServiceProvider);
         }
 
         @Bean
@@ -73,17 +72,14 @@ public class AuthenticatorConfiguration {
 
     @Bean
     public AuthServiceProviderImpl authServiceHolder(AuthSchema authSchema) {
+
         return new AuthServiceProviderImpl(authSchema);
     }
 
     @Bean
-    public TokenClaimsToUserInfoConverter tokenClaimsToUserInfoConverter(TokenProvider tokenProvider) {
-        return new TokenClaimsToUserInfoConverter(tokenProvider);
-    }
+    public UserService authUserService(TokenProvider tokenProvider, AuthServiceProvider authServiceProvider) {
 
-    @Bean
-    public UserService authUserService(TokenProvider tokenProvider, AuthServiceProvider authServiceProvider, TokenClaimsToUserInfoConverter converter){
-        return new  AuthUserServiceImpl(tokenProvider, authServiceProvider, converter);
+        return new AuthUserServiceImpl(tokenProvider, authServiceProvider);
     }
 
 }

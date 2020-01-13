@@ -70,8 +70,8 @@ public class LdapAuthenticationTest extends BaseTest {
         User user = userService.findUser(options.getMethod(), credentials.getUsername()).orElse(null);
         assertThat(user, notNullValue());
 
-        assertThat(user.getFirstname(), equalTo(options.getFirstName()));
-        assertThat(user.getLastname(), equalTo(options.getLastName()));
+        assertThat(user.getFirstName(), equalTo(options.getFirstName()));
+        assertThat(user.getLastName(), equalTo(options.getLastName()));
     }
 
 
@@ -84,17 +84,17 @@ public class LdapAuthenticationTest extends BaseTest {
         User user = userInfos.stream()
                 .filter(u -> StringUtils.equalsIgnoreCase(
                         options.getFirstName(),
-                        u.getFirstname())
+                        u.getFirstName())
                 )
                 .findFirst().orElse(null);
-        assertThat(user.getFirstname(), equalTo(options.getFirstName()));
-        assertThat(user.getLastname(), equalTo(options.getLastName()));
+        assertThat(user.getFirstName(), equalTo(options.getFirstName()));
+        assertThat(user.getLastName(), equalTo(options.getLastName()));
     }
 
     private void checkNormalUser(UsernamePasswordCredentials credentials, UserInfo userInfo) {
-        assertThat(userInfo.getAdditionalInfo().get("firstName"),
+        assertThat(userInfo.getUser().getFirstName(),
                 equalTo(options.getFirstName()));
-        assertThat(userInfo.getAdditionalInfo().get("lastName"),
+        assertThat(userInfo.getUser().getLastName(),
                 equalTo(options.getLastName()));
     }
 

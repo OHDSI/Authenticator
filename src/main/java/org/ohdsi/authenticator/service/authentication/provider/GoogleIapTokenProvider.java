@@ -36,9 +36,9 @@ public class GoogleIapTokenProvider extends AbstractInvalidatableTokenProvider {
     }
 
     @Override
-    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    public String createToken(String username, Map<String, Object> userAdditionalInfo, Date expirationDate) {
 
-        throw new IllegalStateException("IAP token cannot be generated. This is responsibility of GCP");
+        throw new IllegalStateException("IAP token cannot be generated. This is responsibility of Google Cloud Platform(GCP)");
     }
 
     @Override

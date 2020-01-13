@@ -9,17 +9,10 @@ import org.springframework.util.StringUtils;
 
 public class AdAuthService extends DirectoryBasedAuthService<AdAuthServiceConfig> {
 
-    public static final String AUTH_METHOD_NAME = "AD";
 
-    public AdAuthService(AdAuthServiceConfig config) {
+    public AdAuthService(AdAuthServiceConfig config, String method) {
 
-        super(config);
-    }
-
-    @Override
-    public String getMethodName() {
-
-        return AUTH_METHOD_NAME;
+        super(config, method);
     }
 
     @Override

@@ -59,6 +59,7 @@ public class GoogleIapAuthenticationTest extends BaseTest {
         UserInfo userInfo = authenticator.refreshToken(accessToken);
         Assert.assertEquals(accessToken, userInfo.getToken());
         Assert.assertEquals("refresh-token@email.com", userInfo.getUsername());
+        Assert.assertEquals("refresh-token@email.com", userInfo.getUser().getUsername());
 
     }
 

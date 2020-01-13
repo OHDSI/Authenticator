@@ -14,8 +14,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.mapper.AttributesToUserConverter;
-import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.ohdsi.authenticator.service.directory.ldap.LdapAuthServiceConfig;
@@ -36,32 +35,30 @@ import org.springframework.ldap.query.SearchScope;
 public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig> extends BaseAuthService<T> {
 
     public static final String PASSWORD_ATTR = "password";
-
-
     protected LdapTemplate ldapTemplate;
     protected ContextSource contextSource;
 
-    public DirectoryBasedAuthService(T config) {
+    public DirectoryBasedAuthService(T config, String method) {
 
-        super(config);
+        super(config, method);
         this.contextSource = initContextSource();
         this.ldapTemplate = initLdap();
     }
 
 
     @Override
-    public AuthenticationToken authenticate(Credentials credentials) {
+    public TokenInfo authenticate(Credentials credentials) {
 
         if (!(credentials instanceof UsernamePasswordCredentials)) {
-            throw new IllegalArgumentException("credentials should be UsernamePasswordCredentials");
+            throw new AuthenticationException("credentials should be UsernamePasswordCredentials");
         }
         UsernamePasswordCredentials passwordCredentials = (UsernamePasswordCredentials) credentials;
-        Map<String, String> details = this.authenticate(passwordCredentials);
+        User user = this.authenticate(passwordCredentials);
 
-        return new AuthenticationBuilder()
-                .setAuthenticated(!details.isEmpty())
-                .setUsername(passwordCredentials.getUsername())
-                .setUserDetails(details)
+        return TokenInfo.builder()
+                .authMethod(method)
+                .username(passwordCredentials.getUsername())
+                .user(user)
                 .build();
     }
 
@@ -73,10 +70,9 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                 .filter(filterForSingleUser(username));
 
         return ldapTemplate
-                .search(query, (AttributesMapper<User>) attributes ->
-                        AttributesToUserConverter
-                                .of(username, getValuesMapFromAttributes(attributes), config)
-                                .extractUserDetails())
+                .search(query,
+                        (AttributesMapper<User>) attributes -> attributesToUserConverter.convert(username, getValuesMapFromAttributes(attributes))
+                )
                 .stream().findFirst();
     }
 
@@ -89,9 +85,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                 .filter(filter);
 
         return ldapTemplate.search(query, (AttributesMapper<User>) attributes ->
-                AttributesToUserConverter
-                        .of(getValuesMapFromAttributes(attributes), config)
-                        .extractUserDetails()
+                attributesToUserConverter.convert(getValuesMapFromAttributes(attributes))
         );
     }
 
@@ -122,7 +116,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
         return username;
     }
 
-    private Map<String, String> authenticate(UsernamePasswordCredentials passwordCredentials) {
+    private User authenticate(UsernamePasswordCredentials passwordCredentials) {
 
         try {
             String username = passwordCredentials.getUsername();
@@ -130,14 +124,16 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
             LdapQuery query = query()
                     .searchScope(SearchScope.SUBTREE)
                     .filter(filterForSingleUser(username));
+
             return ldapTemplate.authenticate(
-                    query, passwordCredentials.getPassword(),
+                    query,
+                    passwordCredentials.getPassword(),
                     (dirContext, ldapEntryIdentification) -> {
                         try {
                             Attributes attributes = dirContext.getAttributes(ldapEntryIdentification.getRelativeName());
-                            return extractUserDetails(username, getValuesMapFromAttributes(attributes));
+                            return attributesToUserConverter.convert(getValuesMapFromAttributes(attributes));
                         } catch (NamingException e) {
-                            throw new RuntimeException(e);
+                            throw new AuthenticationException(e);
                         }
                     });
         } catch (Exception ex) {
@@ -150,7 +146,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
         return new AndFilter()
                 .and(new HardcodedFilter(config.getSearchFilter()))
                 .and(new EqualsFilter(
-                        config.getFieldsToUser().getUsername(),
+                        config.getFieldsToExtract().getUsername(),
                         prepareUsername(username))
                 );
     }

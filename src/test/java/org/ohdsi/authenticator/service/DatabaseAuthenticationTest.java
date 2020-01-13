@@ -28,8 +28,8 @@ public class DatabaseAuthenticationTest extends BaseTest {
                 Objects.equals(userInfo.getUsername(), authRequest.getUsername())
                         && Objects.nonNull(userInfo.getToken())
                         && Objects.equals(userInfo.getAuthMethod(), METHOD)
-                        && Objects.equals(userInfo.getAdditionalInfo().get("firstName"), "Pavel")
-                        && Objects.equals(userInfo.getAdditionalInfo().get("lastName"), "Grafkin"),
+                        && Objects.equals(userInfo.getUser().getFirstName(), "Pavel")
+                        && Objects.equals(userInfo.getUser().getLastName(), "Grafkin"),
                 "Failed to authenticate user with proper credentials"
         );
     }

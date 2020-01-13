@@ -78,11 +78,8 @@ authenticator:
         searchFilter: (objectClass=inetOrgPerson)
         countLimit: 0
         ignorePartialResultException: true
-        fieldsToUser:
-          username: uid
-          firstName: displayName
-          lastName: sn
         fieldsToExtract:
+          username: uid
           firstName: displayName
           lastName: sn
     ad:
@@ -98,11 +95,8 @@ authenticator:
         # For real AD userPrincipalName attribute should be used
         searchFilter: (objectClass=inetOrgPerson)
         ignorePartialResultException: true
-        fieldsToUser:
-          username: uid
-          firstName: givenName
-          lastName: sn
         fieldsToExtract:
+          username: uid
           firstName: givenName
           lastName: sn
 security:

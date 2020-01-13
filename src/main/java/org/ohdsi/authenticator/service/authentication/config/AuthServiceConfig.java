@@ -1,6 +1,5 @@
 package org.ohdsi.authenticator.service.authentication.config;
 
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.ohdsi.authenticator.service.directory.ldap.UserMappingConfig;
@@ -9,8 +8,6 @@ import org.ohdsi.authenticator.service.directory.ldap.UserMappingConfig;
 @Getter
 public abstract class AuthServiceConfig {
 
-    private Map<String, String> fieldsToExtract;
-
-    private UserMappingConfig fieldsToUser;
+    private UserMappingConfig fieldsToExtract;
 
 }

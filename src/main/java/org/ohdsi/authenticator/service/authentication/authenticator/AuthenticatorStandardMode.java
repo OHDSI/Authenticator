@@ -2,50 +2,43 @@ package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
-import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.converter.TokenInfoToTokenConverter;
+import org.ohdsi.authenticator.converter.TokenInfoToUserInfoConverter;
+import org.ohdsi.authenticator.exception.MethodNotSupportedAuthenticationException;
+import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.AuthService;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
 import org.ohdsi.authenticator.service.authentication.TokenProvider;
-import org.ohdsi.authenticator.service.authentication.UserService;
 import org.pac4j.core.credentials.Credentials;
 
 @Slf4j
 public class AuthenticatorStandardMode implements Authenticator {
 
-    private static final String BAD_CREDENTIALS_ERROR = "Bad credentials";
-    private static final String METHOD_NOT_SUPPORTED_ERROR = "Method not supported";
-
-    private UserService userService;
     private TokenProvider tokenProvider;
     private AuthServiceProviderImpl authServiceProvider;
+    private TokenInfoToTokenConverter tokenInfoToTokenConverter;
+    private TokenInfoToUserInfoConverter tokenInfoToUserInfoConverter;
 
 
-    public AuthenticatorStandardMode(UserService userService,
-                                     TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
+    public AuthenticatorStandardMode(TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
 
-        this.userService = userService;
         this.tokenProvider = tokenProvider;
         this.authServiceProvider = authServiceProvider;
+        this.tokenInfoToTokenConverter = new TokenInfoToTokenConverter(tokenProvider);
+        this.tokenInfoToUserInfoConverter = new TokenInfoToUserInfoConverter();
     }
 
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
-        AuthService authService = authServiceProvider.getByMethod(method);
+        AuthService authService = authServiceProvider.getByMethod(method)
+                .orElseThrow(MethodNotSupportedAuthenticationException::new);
 
-        if (authService == null) {
-            throw new AuthenticationException(METHOD_NOT_SUPPORTED_ERROR);
-        }
+        TokenInfo authentication = authService.authenticate(request);
 
-        AuthenticationToken authentication = authService.authenticate(request);
-
-        if (!authentication.isAuthenticated()) {
-            throw new AuthenticationException(BAD_CREDENTIALS_ERROR);
-        }
-
-        return userService.buildUserInfo(authentication, method);
+        String token = tokenInfoToTokenConverter.toToken(authentication);
+        return tokenInfoToUserInfoConverter.toUserInfo(authentication, token);
     }
 
     @Override
@@ -57,11 +50,14 @@ public class AuthenticatorStandardMode implements Authenticator {
     @Override
     public UserInfo refreshToken(String token) {
 
-        Claims claims = tokenProvider.validateTokenAndGetClaims(token);
-        String usedMethod = claims.get(AuthServiceProviderImpl.METHOD_KEY, String.class);
-        AuthService authService = authServiceProvider.getByMethod(usedMethod);
-        AuthenticationToken authentication = authService.refreshToken(claims);
-        return userService.buildUserInfo(authentication, usedMethod);
+        TokenInfo tokenInfo = tokenInfoToTokenConverter.toTokenInfo(token);
+        AuthService authService = authServiceProvider.getByMethod(tokenInfo.getAuthMethod())
+                .orElseThrow(MethodNotSupportedAuthenticationException::new);
+
+        TokenInfo newAuthentication = authService.refreshToken(tokenInfo);
+        String newToken = tokenInfoToTokenConverter.toToken(newAuthentication);
+        return tokenInfoToUserInfoConverter.toUserInfo(newAuthentication, newToken);
+
     }
 
     @Override
