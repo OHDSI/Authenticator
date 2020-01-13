@@ -2,6 +2,7 @@ package org.ohdsi.authenticator.service;
 
 import java.util.List;
 import java.util.Optional;
+import lombok.Getter;
 import org.ohdsi.authenticator.converter.AttributesToUserConverter;
 import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.User;
@@ -16,6 +17,7 @@ public abstract class BaseAuthService<T extends AuthServiceConfig> implements Au
 
     protected T config;
 
+    @Getter
     protected String method;
 
     public BaseAuthService(T config, String method) {

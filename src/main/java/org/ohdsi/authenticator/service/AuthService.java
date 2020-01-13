@@ -16,4 +16,6 @@ public interface AuthService {
 
     List<User> findAllUsers();
 
+    String getMethod();
+
 }
