@@ -147,6 +147,7 @@ Authentication across directory requires special system account that is used to 
     Query example: `uid={0}`. For succesful authentication `searchFilter` must return exactly one record.
     When a single record is found, authentication service will try to bind to directory using distinguished name of result node and
     provided password. 
+`allUserSearchFilter` is LDAP query to retrieve all users, unlike the `searchFilter` this query is not parameterized    
 
 `url` defines server URL including protocol and port, e.g. `ldap://localhost:389`
 `userDn` Distinguished name of system account having permissions to search across directory
@@ -170,6 +171,7 @@ Authentication across directory requires special system account that is used to 
         password: secret
         url: ldap://localhost:389
         searchFilter: uid={0}
+        allUserSearchFilter: (objectClass=inetOrgPerson)
         countLimit: 0
         ignorePartialResultException: true
         fieldsToExtract:

@@ -75,7 +75,8 @@ authenticator:
         userDn: uid=admin,ou=system
         password: secret
         url: ldap://localhost:8389
-        searchFilter: (objectClass=inetOrgPerson)
+        searchFilter: uid={0}
+        allUserSearchFilter: (objectClass=inetOrgPerson)
         countLimit: 0
         ignorePartialResultException: true
         fieldsToExtract:

@@ -2,6 +2,7 @@ package org.ohdsi.authenticator.service.directory;
 
 import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -29,11 +30,11 @@ import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.DirContextAuthenticationStrategy;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.ldap.filter.AndFilter;
-import org.springframework.ldap.filter.EqualsFilter;
+import org.springframework.ldap.filter.Filter;
 import org.springframework.ldap.filter.HardcodedFilter;
 import org.springframework.ldap.query.LdapQuery;
 import org.springframework.ldap.query.SearchScope;
+import org.springframework.ldap.support.LdapEncoder;
 
 public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig> extends BaseAuthService<T> {
 
@@ -82,7 +83,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
     @Override
     public List<User> findAllUsers() {
 
-        HardcodedFilter filter = new HardcodedFilter(config.getSearchFilter());
+        HardcodedFilter filter = new HardcodedFilter(config.getAllUserSearchFilter());
         LdapQuery query = query()
                 .searchScope(SearchScope.SUBTREE)
                 .filter(filter);
@@ -124,9 +125,10 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
         try {
             String username = passwordCredentials.getUsername();
 
+            Filter filter = filterForSingleUser(username);
             LdapQuery query = query()
                     .searchScope(SearchScope.SUBTREE)
-                    .filter(filterForSingleUser(username));
+                    .filter(filter);
 
             return ldapTemplate.authenticate(
                     query,
@@ -139,7 +141,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                             throw new AuthenticationException(e);
                         }
                     });
-        } catch(EmptyResultDataAccessException ex) {
+        } catch (EmptyResultDataAccessException ex) {
             throw new BadCredentialsAuthenticationException(ex);
         } catch (Exception ex) {
             if (StringUtils.contains(ex.getMessage(), "LDAP: error code 49")) {
@@ -149,14 +151,20 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
         }
     }
 
-    private AndFilter filterForSingleUser(String username) {
+    private Filter filterForSingleUser(String username) {
 
-        return new AndFilter()
-                .and(new HardcodedFilter(config.getSearchFilter()))
-                .and(new EqualsFilter(
-                        config.getFieldsToExtract().getUsername(),
-                        prepareUsername(username))
-                );
+        return createFilterBaseOnFormattedQueryString(
+                config.getSearchFilter(),
+                prepareUsername(username)
+        );
+    }
+
+    private HardcodedFilter createFilterBaseOnFormattedQueryString(String filterQuery, String filterParamter) {
+
+        return new HardcodedFilter(MessageFormat.format(
+                filterQuery,
+                LdapEncoder.filterEncode(filterParamter))
+        );
     }
 
     private DirContextAuthenticationStrategy getAuthenticationStrategy() {

@@ -13,6 +13,7 @@ public class LdapAuthServiceConfig extends AuthServiceConfig {
     private String userDn;
     private String password;
     private String searchFilter;
+    private String allUserSearchFilter;
     private boolean ignorePartialResultException = false;
     private int countLimit = 0;
     private int timeLimit = 0;
