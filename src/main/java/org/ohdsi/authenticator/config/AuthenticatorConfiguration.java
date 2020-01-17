@@ -3,15 +3,15 @@ package org.ohdsi.authenticator.config;
 import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
 import org.ohdsi.authenticator.service.authentication.AuthenticationMode;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
+import org.ohdsi.authenticator.service.authentication.TokenProvider;
+import org.ohdsi.authenticator.service.authentication.UserService;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthServiceProviderImpl;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorProxyMode;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorStandardMode;
+import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
 import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenSignatureVerifier;
 import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenVerifier;
-import org.ohdsi.authenticator.service.authentication.provider.GoogleIapTokenProvider;
 import org.ohdsi.authenticator.service.authentication.provider.JwtTokenProvider;
-import org.ohdsi.authenticator.service.authentication.TokenProvider;
-import org.ohdsi.authenticator.service.authentication.UserService;
 import org.ohdsi.authenticator.service.authentication.user.AuthUserServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,7 +26,7 @@ public class AuthenticatorConfiguration {
     public class StandardMode {
 
         @Bean
-        public Authenticator authentication( TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
+        public Authenticator authentication( TokenProvider tokenProvider, AuthServiceProvider authServiceProvider) {
 
             return new AuthenticatorStandardMode(tokenProvider, authServiceProvider);
         }
@@ -71,7 +71,7 @@ public class AuthenticatorConfiguration {
     }
 
     @Bean
-    public AuthServiceProviderImpl authServiceHolder(AuthSchema authSchema) {
+    public AuthServiceProvider authServiceProvider(AuthSchema authSchema) {
 
         return new AuthServiceProviderImpl(authSchema);
     }

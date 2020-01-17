@@ -8,6 +8,7 @@ import org.ohdsi.authenticator.exception.MethodNotSupportedAuthenticationExcepti
 import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.AuthService;
+import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
 import org.ohdsi.authenticator.service.authentication.TokenProvider;
 import org.pac4j.core.credentials.Credentials;
@@ -16,12 +17,12 @@ import org.pac4j.core.credentials.Credentials;
 public class AuthenticatorStandardMode implements Authenticator {
 
     private TokenProvider tokenProvider;
-    private AuthServiceProviderImpl authServiceProvider;
+    private AuthServiceProvider authServiceProvider;
     private TokenInfoToTokenConverter tokenInfoToTokenConverter;
     private TokenInfoToUserInfoConverter tokenInfoToUserInfoConverter;
 
 
-    public AuthenticatorStandardMode(TokenProvider tokenProvider, AuthServiceProviderImpl authServiceProvider) {
+    public AuthenticatorStandardMode(TokenProvider tokenProvider, AuthServiceProvider authServiceProvider) {
 
         this.tokenProvider = tokenProvider;
         this.authServiceProvider = authServiceProvider;

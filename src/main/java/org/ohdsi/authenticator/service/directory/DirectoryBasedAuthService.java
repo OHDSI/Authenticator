@@ -23,6 +23,7 @@ import org.ohdsi.authenticator.service.directory.ldap.LdapAuthServiceConfig;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.LdapTemplate;
@@ -138,6 +139,8 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                             throw new AuthenticationException(e);
                         }
                     });
+        } catch(EmptyResultDataAccessException ex) {
+            throw new BadCredentialsAuthenticationException(ex);
         } catch (Exception ex) {
             if (StringUtils.contains(ex.getMessage(), "LDAP: error code 49")) {
                 throw new BadCredentialsAuthenticationException(ex);
