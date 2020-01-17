@@ -17,6 +17,7 @@ objectClass: inetOrgPerson
 objectClass: person
 objectClass: top
 cn: Administrator
+sn: LastName
 givenName: FirstName
 initials: Middle
 uid: administrator@example.com

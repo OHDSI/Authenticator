@@ -1,5 +1,11 @@
 package org.ohdsi.authenticator.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
@@ -21,13 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -87,10 +86,10 @@ public class GithubAuthenticationTest extends FluentTest {
 
         List<NameValuePair> params = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
         String code = params.stream()
-            .filter(p -> Objects.equals(p.getName(), "code"))
-            .findFirst()
-            .orElseThrow(() -> new AuthenticationException("Cannot extract code"))
-            .getValue();
+                .filter(p -> Objects.equals(p.getName(), "code"))
+                .findFirst()
+                .orElseThrow(() -> new AuthenticationException("Cannot extract code"))
+                .getValue();
 
         UserInfo userInfo = authenticator.authenticate("github", new TokenCredentials(code));
 

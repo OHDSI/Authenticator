@@ -1,45 +1,48 @@
 package org.ohdsi.authenticator.service.authentication.authenticator;
 
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.model.UserInfo;
 import org.ohdsi.authenticator.service.authentication.Authenticator;
 import org.ohdsi.authenticator.service.authentication.TokenProvider;
-import org.ohdsi.authenticator.service.authentication.TokenService;
+import org.ohdsi.authenticator.service.authentication.UserService;
 import org.pac4j.core.credentials.Credentials;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+
+
+@Slf4j
 public class AuthenticatorProxyMode implements Authenticator {
-    protected static final Logger logger = LoggerFactory.getLogger(AuthenticatorProxyMode.class.getName());
 
-    private TokenService tokenService;
+    private UserService userService;
     private TokenProvider tokenProvider;
 
-    public AuthenticatorProxyMode(TokenService tokenService,
+    public AuthenticatorProxyMode(UserService userService,
                                   TokenProvider tokenProvider) {
 
-        this.tokenService = tokenService;
+        this.userService = userService;
         this.tokenProvider = tokenProvider;
     }
 
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
-        throw new AuthenticationException("Authentication is delegated to the proxy level, for PROXY authentication modeю");
+        throw new AuthenticationException("Authentication is delegated to the proxy level, for PROXY authentication mode.");
     }
 
     @Override
     public String resolveUsername(String token) {
 
-        return tokenService.resolveAdditionalInfo(token, Claims.SUBJECT, String.class);
+        return tokenProvider.resolveValue(token, Claims.SUBJECT, String.class);
     }
 
 
     @Override
     public UserInfo refreshToken(String token) {
 
-        return tokenService.resolveUser(token);
+        UserInfo userInfo = userService.resolveUser(token);
+        userInfo.getUser().setUsername(userInfo.getUsername());
+        return userInfo;
     }
 
     @Override
@@ -47,6 +50,5 @@ public class AuthenticatorProxyMode implements Authenticator {
 
         tokenProvider.invalidateToken(token);
     }
-
 
 }

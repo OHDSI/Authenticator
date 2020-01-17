@@ -27,7 +27,7 @@ public class JwtTokenProvider extends AbstractInvalidatableTokenProvider {
     }
 
     @Override
-    public String createToken(String username, Map<String, String> userAdditionalInfo, Date expirationDate) {
+    public String createToken(String username, Map<String, Object> userAdditionalInfo, Date expirationDate) {
 
         Claims claims = Jwts.claims();
         claims

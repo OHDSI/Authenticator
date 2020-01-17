@@ -2,7 +2,7 @@ package org.ohdsi.authenticator.service.rest;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.ohdsi.authenticator.service.AuthServiceConfig;
+import org.ohdsi.authenticator.service.authentication.config.AuthServiceConfig;
 
 import java.util.Map;
 

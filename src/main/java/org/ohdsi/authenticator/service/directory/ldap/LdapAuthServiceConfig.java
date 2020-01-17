@@ -2,7 +2,7 @@ package org.ohdsi.authenticator.service.directory.ldap;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.ohdsi.authenticator.service.AuthServiceConfig;
+import org.ohdsi.authenticator.service.authentication.config.AuthServiceConfig;
 
 @Getter
 @Setter
@@ -13,6 +13,7 @@ public class LdapAuthServiceConfig extends AuthServiceConfig {
     private String userDn;
     private String password;
     private String searchFilter;
+    private String allUserSearchFilter;
     private boolean ignorePartialResultException = false;
     private int countLimit = 0;
     private int timeLimit = 0;

@@ -55,18 +55,10 @@ public class RestAuthenticationTest extends BaseTest {
         Assert.assertTrue("Failed to authenticate user with proper credentials", jwtTokenProvider.getValidityInSeconds() >= getExpirationInSecs(accessToken));
     }
 
-    @Test
+    @Test(expected = AuthenticationException.class)
     public void testRestAuthFailure() {
 
         UsernamePasswordCredentials authRequest = new UsernamePasswordCredentials("dummy", "dummy");
-
-        boolean failed = false;
-        try {
-            authenticator.authenticate("rest-arachne", authRequest);
-        } catch (AuthenticationException ex) {
-            failed = true;
-        }
-
-        Assert.assertTrue("Authenticated user with bad credentials", failed);
+        authenticator.authenticate("rest-arachne", authRequest);
     }
 }
