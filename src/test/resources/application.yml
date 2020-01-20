@@ -94,7 +94,8 @@ authenticator:
         domainSuffix: example.com
         url: ldap://localhost:9389
         # For real AD userPrincipalName attribute should be used
-        searchFilter: (objectClass=inetOrgPerson)
+        searchFilter: uid={0}
+        allUserSearchFilter: (objectClass=inetOrgPerson)
         ignorePartialResultException: true
         fieldsToExtract:
           username: uid
