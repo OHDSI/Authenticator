@@ -1,4 +1,4 @@
-package org.ohdsi.authenticator.service.rest;
+package org.ohdsi.authenticator.service.rest.config;
 
 import lombok.Getter;
 import lombok.Setter;

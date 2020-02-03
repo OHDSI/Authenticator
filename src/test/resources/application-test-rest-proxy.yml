@@ -1,0 +1,16 @@
+authenticator:
+  methods:
+    rest-arachne:
+      config:
+        proxy:
+          enabled: true
+          #this proxy ip is not fixed, so it could change. To fix this use any available proxy
+          host: localhost
+          port: 9990
+    rest-atlas:
+      config:
+        proxy:
+          enabled: true
+          #this proxy ip is not fixed, so it could change. To fix this use any available proxy
+          host: localhost
+          port: 9990

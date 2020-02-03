@@ -18,6 +18,9 @@ import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorStandardMode;
+import org.ohdsi.authenticator.service.rest.config.HttpPart;
+import org.ohdsi.authenticator.service.rest.config.RestAuthServiceConfig;
+import org.ohdsi.authenticator.service.rest.config.TokenSource;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.springframework.expression.ExpressionParser;
@@ -37,9 +40,11 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     public static final String AUTH_METHOD_NAME = "REST";
 
-    public RestAuthService(RestAuthServiceConfig config, String method) {
+    private RestTemplateProvider restTemplateProvider;
 
-        super(config, method);
+    public RestAuthService(RestAuthServiceConfig config) {
+        super(config);
+        this.restTemplateProvider = new RestTemplateProvider(config.getProxy());
     }
 
     @Override
@@ -47,7 +52,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
         UsernamePasswordCredentials creds = (UsernamePasswordCredentials) request;
 
-        RestTemplate restTemplate = getRestTemplate();
+        RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
 
         HttpHeaders headers = getAuthHeaders();
         Map<String, String> body = getAuthBody(creds);
@@ -92,12 +97,9 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
         RestTemplate restTemplate = getRestTemplate();
         MultiValueMap<String, String> headers = getHeadersWithToken(tokenInfo.getRemoteToken());
+        HttpEntity httpEntity = new HttpEntity(new HashMap<>(), headers);
+        ResponseEntity<String> response = restTemplate.exchange(config.getRefresh().getUrl(), HttpMethod.POST, httpEntity, String.class);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                config.getRefresh().getUrl(),
-                HttpMethod.POST,
-                new HttpEntity(headers),
-                String.class);
         String newRemoteToken = extractRemoteToken(response, config.getRefresh());
 
         return TokenInfo.builder()
@@ -202,7 +204,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private ResponseEntity<String> queryUserInfo(String token) {
 
-        RestTemplate restTemplate = getRestTemplate();
+        RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
         MultiValueMap<String, String> headers = getHeadersWithToken(token);
         Map<String, String> body = new HashMap<>();
         HttpEntity httpEntity = new HttpEntity(body, headers);
@@ -237,10 +239,5 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
             return null;
         }
         return extractExpirationDate(remoteToken);
-    }
-
-    protected RestTemplate getRestTemplate() {
-
-        return new RestTemplate();
     }
 }
