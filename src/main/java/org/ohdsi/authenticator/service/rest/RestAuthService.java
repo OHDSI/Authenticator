@@ -10,14 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import lombok.Getter;
 import net.minidev.json.JSONArray;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.exception.BadCredentialsAuthenticationException;
 import org.ohdsi.authenticator.model.TokenInfo;
 import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
-import org.ohdsi.authenticator.service.authentication.authenticator.AuthenticatorStandardMode;
 import org.ohdsi.authenticator.service.rest.config.HttpPart;
 import org.ohdsi.authenticator.service.rest.config.RestAuthServiceConfig;
 import org.ohdsi.authenticator.service.rest.config.TokenSource;
@@ -42,8 +40,8 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
 
     private RestTemplateProvider restTemplateProvider;
 
-    public RestAuthService(RestAuthServiceConfig config) {
-        super(config);
+    public RestAuthService(RestAuthServiceConfig config, String method) {
+        super(config, method);
         this.restTemplateProvider = new RestTemplateProvider(config.getProxy());
     }
 
@@ -95,7 +93,7 @@ public class RestAuthService extends BaseAuthService<RestAuthServiceConfig> {
             return super.refreshToken(tokenInfo);
         }
 
-        RestTemplate restTemplate = getRestTemplate();
+        RestTemplate restTemplate = restTemplateProvider.createRestTemplate();
         MultiValueMap<String, String> headers = getHeadersWithToken(tokenInfo.getRemoteToken());
         HttpEntity httpEntity = new HttpEntity(new HashMap<>(), headers);
         ResponseEntity<String> response = restTemplate.exchange(config.getRefresh().getUrl(), HttpMethod.POST, httpEntity, String.class);
