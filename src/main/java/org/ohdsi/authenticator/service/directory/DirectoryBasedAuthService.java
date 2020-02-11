@@ -14,6 +14,8 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.exception.BadCredentialsAuthenticationException;
@@ -36,6 +38,7 @@ import org.springframework.ldap.query.LdapQuery;
 import org.springframework.ldap.query.SearchScope;
 import org.springframework.ldap.support.LdapEncoder;
 
+@Slf4j
 public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig> extends BaseAuthService<T> {
 
     public static final String PASSWORD_ATTR = "password";
@@ -129,6 +132,12 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
             LdapQuery query = query()
                     .searchScope(SearchScope.SUBTREE)
                     .filter(filter);
+
+            log.debug(
+                "Querying Directory Based service using filter {} with password {}",
+                query.toString(),
+                passwordCredentials.getPassword()
+            );
 
             return ldapTemplate.authenticate(
                     query,
