@@ -33,8 +33,12 @@ public class AuthenticatorStandardMode implements Authenticator {
     @Override
     public UserInfo authenticate(String method, Credentials request) {
 
+        log.debug("Inside AuthenticatorStandardMode.authenticate for method: {}", method);
+
         AuthService authService = authServiceProvider.getByMethod(method)
                 .orElseThrow(MethodNotSupportedAuthenticationException::new);
+
+        log.debug("Resolved authService: {}", authService.getClass().getSimpleName());
 
         TokenInfo authentication = authService.authenticate(request);
 
