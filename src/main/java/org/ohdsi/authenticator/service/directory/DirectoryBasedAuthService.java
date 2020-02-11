@@ -165,8 +165,10 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                         }
                     });
         } catch (EmptyResultDataAccessException ex) {
+            log.debug("EmptyResultDataAccessException: ", ex);
             throw new BadCredentialsAuthenticationException(ex);
         } catch (Exception ex) {
+            log.debug("Exception: ", ex);
             if (StringUtils.contains(ex.getMessage(), "LDAP: error code 49")) {
                 throw new BadCredentialsAuthenticationException(ex);
             }
