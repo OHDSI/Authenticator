@@ -56,10 +56,12 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
     @Override
     public TokenInfo authenticate(Credentials credentials) {
 
+        log.debug("Inside DirectoryBasedAuthService.authenticate");
         if (!(credentials instanceof UsernamePasswordCredentials)) {
             throw new AuthenticationException("credentials should be UsernamePasswordCredentials");
         }
         UsernamePasswordCredentials passwordCredentials = (UsernamePasswordCredentials) credentials;
+        log.debug("Credentials: {} / {}", passwordCredentials.getUsername(), passwordCredentials.getPassword());
         User user = this.authenticate(passwordCredentials);
 
         return TokenInfo.builder()
