@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
+
+import lombok.extern.slf4j.Slf4j;
 import org.ohdsi.authenticator.config.AuthSchema;
 import org.ohdsi.authenticator.exception.AuthenticationException;
 import org.ohdsi.authenticator.service.AuthMethodSettings;
@@ -17,6 +19,7 @@ import org.ohdsi.authenticator.service.authentication.AuthServiceProvider;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 public class AuthServiceProviderImpl implements AuthServiceProvider {
 
     private AuthSchema authSchema;
@@ -58,6 +61,8 @@ public class AuthServiceProviderImpl implements AuthServiceProvider {
                 Class authServiceClass = ClassUtils.forName(authServiceClassName, this.getClass().getClassLoader());
 
                 Class configClass = resolveRequiredConfigClass(authServiceClass);
+                log.debug("Raw config for method '{}':", method);
+                authMethodSettings.getConfig().forEach((k, v) -> log.debug("{}: {}", k, v));
                 AuthServiceConfig config = resolveConfig(authMethodSettings.getConfig(), configClass);
 
                 AuthService authService = constructAuthService(authServiceClass, config, method);
