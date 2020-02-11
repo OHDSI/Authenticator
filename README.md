@@ -47,9 +47,9 @@ The `STANDARD` authentication mode is the default mode, so it is not necessary t
 Common configuration parameters:
 
 - `fieldsToExtract`:
-  - keys represent names of user's properties, which will be stored in JWT body / UserInfo.additionalInfo
+  - keys represent names of user's properties, which will be stored in JWT body / UserInfo.user
   - values represent SpEL expressions used to extract and calculate value of the properties based on the data provided by authentication origin 
-
+    
 #### Database (JDBC) authentication
 
 - SQL query must return a single row
@@ -160,6 +160,7 @@ Authentication across directory requires special system account that is used to 
     Query example: `uid={0}`. For succesful authentication `searchFilter` must return exactly one record.
     When a single record is found, authentication service will try to bind to directory using distinguished name of result node and
     provided password. 
+`allUserSearchFilter` is LDAP query to retrieve all users, unlike the `searchFilter` this query is not parameterized    
 
 `url` defines server URL including protocol and port, e.g. `ldap://localhost:389`
 `userDn` Distinguished name of system account having permissions to search across directory
@@ -183,11 +184,24 @@ Authentication across directory requires special system account that is used to 
         password: secret
         url: ldap://localhost:389
         searchFilter: uid={0}
+        allUserSearchFilter: (objectClass=inetOrgPerson)
         countLimit: 0
         ignorePartialResultException: true
         fieldsToExtract:
           firstName: displayName
           lastName: sn
+          email: mail
+          organization: company
+          department: department
+          affiliation: company
+          personalSummary: description
+          phone: telephoneNumber
+          mobile: mobile
+          address1: streetAddress
+          city: l
+          countryCode: c
+          zipCode: postalCode
+
 ``` 
 
 #### Active Directory authentication

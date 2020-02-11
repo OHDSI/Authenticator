@@ -6,7 +6,7 @@
 
     <groupId>org.ohdsi</groupId>
     <artifactId>authenticator</artifactId>
-    <version>0.0.2-QA</version>
+    <version>0.0.3-QA</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -184,6 +184,12 @@
             <groupId>com.unboundid</groupId>
             <artifactId>unboundid-ldapsdk</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

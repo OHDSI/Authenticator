@@ -4,9 +4,17 @@ import org.ohdsi.authenticator.service.directory.DirectoryBasedAuthService;
 
 public class LdapAuthService extends DirectoryBasedAuthService<LdapAuthServiceConfig> {
 
-    public LdapAuthService(LdapAuthServiceConfig config) {
+    public static final String AUTH_METHOD_NAME = "LDAP";
 
-        super(config);
+    public LdapAuthService(LdapAuthServiceConfig config, String method) {
+
+        super(config, method);
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
 }

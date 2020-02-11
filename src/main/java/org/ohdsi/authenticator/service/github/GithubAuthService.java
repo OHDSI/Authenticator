@@ -1,9 +1,10 @@
 package org.ohdsi.authenticator.service.github;
 
 import com.github.scribejava.apis.GitHubApi;
-import lombok.var;
+import java.util.Objects;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.model.TokenInfo;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.TokenCredentials;
@@ -13,23 +14,22 @@ import org.pac4j.oauth.credentials.OAuth20Credentials;
 import org.pac4j.oauth.profile.OAuth20Profile;
 import org.pac4j.oauth.profile.github.GitHubProfileDefinition;
 
-import java.util.Map;
-import java.util.Objects;
-
 public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> {
+
+    public static final String AUTH_METHOD_NAME = "GITHUB";
 
     private OAuth20Configuration oAuthConfig;
     private OAuth20Client oAuthClient;
 
-    public GithubAuthService(GithubAuthServiceConfig config) {
+    public GithubAuthService(GithubAuthServiceConfig config, String method) {
 
-        super(config);
+        super(config, method);
         this.initOAuthConfig();
         this.initOAuthClient();
     }
 
     @Override
-    public AuthenticationToken authenticate(Credentials credentials) {
+    public TokenInfo authenticate(Credentials credentials) {
 
         TokenCredentials tokenCredentials = (TokenCredentials) credentials;
 
@@ -47,14 +47,21 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
                 .create(oAuthCredentials, null)
                 .orElseThrow(() -> new AuthenticationException("Cannot retrieve profile"));
 
-        Object username = profile.getAttribute(config.getUsernameProperty()).toString();
-        Map<String, String>  details = extractUserDetails(profile);
+        String username = profile.getAttribute(config.getUsernameProperty()).toString();
 
-        return new AuthenticationBuilder()
-                .setAuthenticated(true)
-                .setUsername(username.toString())
-                .setUserDetails(details)
+        User user = attributesToUserConverter.convert(profile.getAttributes());
+
+        return TokenInfo.builder()
+                .authMethod(method)
+                .username(username)
+                .user(user)
                 .build();
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
     private void initOAuthConfig() {
@@ -82,8 +89,4 @@ public class GithubAuthService extends BaseAuthService<GithubAuthServiceConfig> 
         return oAuthConfig.buildService(null, oAuthClient, null).getAuthorizationUrl();
     }
 
-    private Map<String, String> extractUserDetails(OAuth20Profile profile) {
-
-        return extractUserDetails(profile.getAttributes());
-    }
 }

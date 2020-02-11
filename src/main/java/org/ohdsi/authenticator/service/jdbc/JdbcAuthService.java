@@ -1,24 +1,27 @@
 package org.ohdsi.authenticator.service.jdbc;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import lombok.var;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import org.ohdsi.authenticator.exception.AuthenticationException;
-import org.ohdsi.authenticator.model.AuthenticationToken;
+import org.ohdsi.authenticator.exception.BadCredentialsAuthenticationException;
+import org.ohdsi.authenticator.model.TokenInfo;
+import org.ohdsi.authenticator.model.User;
 import org.ohdsi.authenticator.service.BaseAuthService;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ClassUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
 public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
+
+    public static final String AUTH_METHOD_NAME = "JDBC";
 
     private static final String USERNAME_PARAM = "username";
     private static final String PASSWORD_PARAM = "password";
@@ -26,27 +29,41 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
     private HikariDataSource ds;
     private PasswordEncoder passwordEncoder;
 
-    public JdbcAuthService(JdbcAuthServiceConfig config) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public JdbcAuthService(JdbcAuthServiceConfig config, String method) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
 
-        super(config);
+        super(config, method);
         initConnectionPool();
         this.passwordEncoder = getPasswordEncoder();
     }
 
     @Override
-    public AuthenticationToken authenticate(Credentials credentials) {
-
+    public TokenInfo authenticate(Credentials credentials) {
         UsernamePasswordCredentials creds = (UsernamePasswordCredentials) credentials;
 
         NamedParameterJdbcTemplate ps = new NamedParameterJdbcTemplate(ds);
         MapSqlParameterSource params = buildQueryParams(creds);
-        Map<String, String> details = ps.queryForObject(config.getQuery(), params, this::mapUserInfo);
-        boolean isAuthenticated = isSuccessfulLogin(creds, details.remove(PASSWORD_PARAM));
-        return new AuthenticationBuilder()
-                .setAuthenticated(isAuthenticated)
-                .setUsername(creds.getUsername())
-                .setUserDetails(details)
-                .build();
+
+        try {
+            User user = ps.queryForObject(
+                    config.getQuery(),
+                    params,
+                    (rs, rowNum) -> mapUserInfo(creds, rs)
+            );
+
+            return TokenInfo.builder()
+                    .authMethod(method)
+                    .username(creds.getUsername())
+                    .user(user)
+                    .build();
+        } catch (EmptyResultDataAccessException ex) {
+            throw new BadCredentialsAuthenticationException(ex);
+        }
+    }
+
+    @Override
+    public String getMethodType() {
+
+        return AUTH_METHOD_NAME;
     }
 
     private void initConnectionPool() {
@@ -70,12 +87,16 @@ public class JdbcAuthService extends BaseAuthService<JdbcAuthServiceConfig> {
         return params;
     }
 
-    private Map<String, String> mapUserInfo(ResultSet rs, int rowNum) {
+    private User mapUserInfo(UsernamePasswordCredentials creds, ResultSet rs) {
 
         try {
-            Map<String, String>  details = extractUserDetails(rsRowToMap(rs));
-            details.put(PASSWORD_PARAM, rs.getString(PASSWORD_PARAM));
-            return details;
+
+            if (!isSuccessfulLogin(creds, rs.getString(PASSWORD_PARAM))) {
+                throw new BadCredentialsAuthenticationException();
+            }
+
+            creds.getUsername();
+            return attributesToUserConverter.convert(rsRowToMap(rs));
         } catch (SQLException ex) {
             throw new AuthenticationException(INFO_EXTRACTION_ERROR);
         }
