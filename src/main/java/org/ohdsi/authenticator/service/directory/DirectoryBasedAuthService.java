@@ -146,7 +146,7 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
 
             log.debug(
                 "Querying Directory Based service using filter {} with password {}",
-                query.toString(),
+                ((HardcodedFilter) filter).encode(new StringBuffer()).toString(),
                 passwordCredentials.getPassword()
             );
 
@@ -155,7 +155,10 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
                     passwordCredentials.getPassword(),
                     (dirContext, ldapEntryIdentification) -> {
                         try {
+                            log.debug("Inside of ContextMapper");
+                            log.debug("Relative name: {}", ldapEntryIdentification.getRelativeName());
                             Attributes attributes = dirContext.getAttributes(ldapEntryIdentification.getRelativeName());
+                            log.debug("Attributes: {}", attributes);
                             return attributesToUserConverter.convert(getValuesMapFromAttributes(attributes));
                         } catch (NamingException e) {
                             throw new AuthenticationException(e);
