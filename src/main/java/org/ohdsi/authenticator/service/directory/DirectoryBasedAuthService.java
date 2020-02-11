@@ -105,6 +105,15 @@ public abstract class DirectoryBasedAuthService<T extends LdapAuthServiceConfig>
         contextSource.setPassword(config.getPassword());
         contextSource.setAuthenticationStrategy(getAuthenticationStrategy());
         contextSource.afterPropertiesSet();
+
+        log.debug(
+            "Directory service params: url={}, baseDn={}, userDn={}, password={}",
+            config.getUrl(),
+            config.getBaseDn(),
+            config.getUserDn(),
+            config.getPassword()
+        );
+
         return contextSource;
     }
 
