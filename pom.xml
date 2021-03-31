@@ -27,7 +27,7 @@
         <jackson-databind.version>2.9.9</jackson-databind.version>
         <json-path.version>2.4.0</json-path.version>
         <nimbus-jose-jwt.version>8.2</nimbus-jose-jwt.version>
-        <guava.version>28.1-jre</guava.version>
+        <guava.version>29.0-jre</guava.version>
         <htmlunit-driver.version>2.34.0</htmlunit-driver.version>
         <junit.version>4.12</junit.version>
         <selenium-java.version>3.141.59</selenium-java.version>
